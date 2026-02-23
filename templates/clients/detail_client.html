@@ -1,0 +1,389 @@
+{% extends 'main.html' %}
+{% load static %}
+
+{% block contenu %}
+<div class="content-wrapper">
+    <div class="container mt-4">
+        <div class="card shadow">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-user-circle me-2"></i> Fiche Client
+                </h4>
+            </div>
+
+            <div class="card-body">
+                <div class="row">
+                    <!-- Photo et informations principales -->
+                    <div class="col-md-4 text-center">
+                        <div class="mb-4">
+                            <div class="avatar-circle mx-auto mb-3"
+                                 style="width: 150px; height: 150px;
+                                        background-color: #0d6efd;
+                                        border-radius: 50%;
+                                        border: 4px solid #0dcaf0;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;">
+                                <i class="fas fa-user fa-4x text-white"></i>
+                            </div>
+                            <h3>{{ client.nom_client }}</h3>
+                            <span class="badge
+                                {% if client.statut == 'actif' %}bg-success
+                                {% elif client.statut == 'suspendu' %}bg-warning text-dark
+                                {% elif client.statut == 'resilie' %}bg-danger
+                                {% elif client.statut == 'non_actif' %}bg-secondary
+                                {% endif %} fs-6">
+                                {% if client.statut == 'actif' %}<i class="fas fa-check-circle me-1"></i>Activé
+                                {% elif client.statut == 'suspendu' %}<i class="fas fa-pause-circle me-1"></i>Suspendu
+                                {% elif client.statut == 'resilie' %}<i class="fas fa-times-circle me-1"></i>Résilié
+                                {% elif client.statut == 'non_actif' %}<i class="fas fa-clock me-1"></i>Non activé
+                                {% endif %}
+                            </span>
+                        </div>
+
+                        <!-- ID Client -->
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title text-muted">ID Client</h6>
+                                <h3 class="text-primary">#{{ client.id }}</h3>
+                            </div>
+                        </div>
+
+                        <!-- Type de contrat -->
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title text-muted">Type de Contrat</h6>
+                                <h4>
+                                    <span class="badge
+                                        {% if client.type_contrat == 'didié' %}bg-dark
+                                        {% elif client.type_contrat == 'partagé' %}bg-info
+                                        {% else %}bg-secondary{% endif %}">
+                                        {{ client.type_contrat|default:"-" }}
+                                    </span>
+                                </h4>
+                            </div>
+                        </div>
+
+                        <!-- Dates importantes -->
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title text-muted">Dates</h6>
+                                <p class="mb-1">
+                                    <i class="fas fa-calendar-plus me-2 text-success"></i>
+                                    <strong>Créé:</strong> {{ client.date_creation|date:"d/m/Y H:i" }}
+                                </p>
+                                <p class="mb-0">
+                                    <i class="fas fa-calendar-edit me-2 text-warning"></i>
+                                    <strong>Modifié:</strong> {{ client.date_modification|date:"d/m/Y H:i" }}
+                                </p>
+                                {% if client.statut == 'actif' and client.date_activation %}
+                                <p class="mb-0">
+                                    <i class="fas fa-calendar-check me-2 text-primary"></i>
+                                    <strong>Activé:</strong> {{ client.date_activation|date:"d/m/Y" }}
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Informations détaillées -->
+                    <div class="col-md-8">
+                        <div class="row">
+                            <!-- Informations de contact -->
+                            <div class="col-md-6">
+                                <div class="card mb-4">
+                                    <div class="card-header bg-primary text-white py-2">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-address-card me-2"></i> Contact
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p>
+                                            <i class="fas fa-phone text-success me-2"></i>
+                                            <strong>Téléphone:</strong><br>
+                                            {% if client.telephone %}
+                                            <a href="tel:{{ client.telephone }}" class="text-decoration-none">
+                                                {{ client.telephone }}
+                                            </a>
+                                            {% else %}
+                                            <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </p>
+                                        <p class="mb-0">
+                                            <i class="fas fa-envelope text-primary me-2"></i>
+                                            <strong>Email:</strong><br>
+                                            {% if client.email %}
+                                            <a href="mailto:{{ client.email }}" class="text-decoration-none">
+                                                {{ client.email }}
+                                            </a>
+                                            {% else %}
+                                            <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Adresse -->
+                                <div class="card mb-4">
+                                    <div class="card-header bg-success text-white py-2">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-map-marker-alt me-2"></i> Localisation
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="mb-2">
+                                            <i class="fas fa-home me-2 text-muted"></i>
+                                            <strong>Adresse:</strong><br>
+                                            {{ client.adresse|linebreaks }}
+                                        </p>
+                                        <p class="mb-0">
+                                            <i class="fas fa-map-pin me-2 text-muted"></i>
+                                            <strong>Quartier:</strong><br>
+                                            {{ client.quartier|default:"Non spécifié" }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Informations techniques -->
+                            <div class="col-md-6">
+                                <div class="card mb-4">
+                                    <div class="card-header bg-warning text-dark py-2">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-network-wired me-2"></i> Réseau
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="mb-3">
+                                            <i class="fas fa-sitemap text-info me-2"></i>
+                                            <strong>VLAN:</strong><br>
+                                            {% if client.vlan %}
+                                            <span class="badge bg-info">{{ client.vlan }}</span>
+                                            {% else %}
+                                            <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </p>
+
+                                        <p class="mb-3">
+                                            <i class="fas fa-wifi text-success me-2"></i>
+                                            <strong>Adresse IP:</strong><br>
+                                            {% if client.adresse_ip %}
+                                            <code class="bg-dark text-white p-2 rounded d-inline-block mt-1">
+                                                {{ client.adresse_ip }}
+                                            </code>
+                                            {% else %}
+                                            <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Bande passante -->
+                                <div class="card mb-4">
+                                    <div class="card-header bg-info text-white py-2">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-tachometer-alt me-2"></i> Bande Passante
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row text-center">
+                                            <div class="col-md-4">
+                                                <div class="mb-3">
+                                                    <h6 class="text-muted">Capacité</h6>
+                                                    <h4 class="text-primary">
+                                                        {{ client.capacite|default:"0" }}
+                                                    </h4>
+                                                    <small>Mbps</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="mb-3">
+                                                    <h6 class="text-muted">Download</h6>
+                                                    <h4 class="text-success">
+                                                        {{ client.download|default:"0" }}
+                                                    </h4>
+                                                    <small>Mbps</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="mb-3">
+                                                    <h6 class="text-muted">Upload</h6>
+                                                    <h4 class="text-info">
+                                                        {{ client.upload|default:"0" }}
+                                                    </h4>
+                                                    <small>Mbps</small>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {% if client.type_contrat == 'didié' %}
+                                        <div class="alert alert-info mt-2">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            <strong>Contrat Dédié :</strong> Bande passante symétrique
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Contrat PDF -->
+                                <div class="card">
+                                    <div class="card-header bg-danger text-white py-2">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-file-contract me-2"></i> Contrat
+                                        </h6>
+                                    </div>
+                                    <div class="card-body text-center">
+                                        {% if client.contrat_pdf %}
+                                        <a href="{% url 'voir_pdf' client.id %}"
+                                           target="_blank"
+                                           class="btn btn-danger btn-lg"
+                                           title="Voir le contrat PDF">
+                                            <i class="fas fa-file-pdf me-2"></i>
+                                            Voir le Contrat
+                                        </a>
+                                        <p class="mt-2 mb-0 text-muted">
+                                            <small>Cliquez pour ouvrir le PDF du contrat</small>
+                                        </p>
+                                        {% else %}
+                                        <div class="text-muted">
+                                            <i class="fas fa-file-excel fa-2x mb-2"></i>
+                                            <p class="mb-0">Aucun contrat PDF disponible</p>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Boutons d'action -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between">
+                                    <a href="{% url 'list_client' %}" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left me-1"></i> Retour à la liste
+                                    </a>
+                                    <div>
+                                        <a href="{% url 'modifier_client' client.id %}" class="btn btn-warning me-2">
+                                            <i class="fas fa-edit me-1"></i> Modifier
+                                        </a>
+                                        <button type="button"
+                                                class="btn btn-danger"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteModal">
+                                            <i class="fas fa-trash me-1"></i> Supprimer
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de suppression -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i> Confirmation
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Voulez-vous vraiment supprimer le client :</p>
+                <p class="h5 text-center my-3">
+                    <strong>"{{ client.nom_client }}"</strong>
+                </p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <strong>Attention :</strong> Cette action supprimera définitivement toutes les informations de ce client.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Annuler
+                </button>
+                <a href="{% url 'supprimer_client' client.id %}" class="btn btn-danger">
+                    <i class="fas fa-trash me-1"></i> Supprimer définitivement
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-circle {
+    border: 4px solid #dee2e6;
+}
+
+.card {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+}
+
+.alert {
+    border-radius: 8px;
+    border: none;
+}
+
+.badge.fs-6 {
+    font-size: 1rem;
+    padding: 0.5em 1em;
+}
+
+.btn-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+}
+
+code {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+}
+
+.text-muted {
+    color: #6c757d !important;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation pour les cartes
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+            this.style.transition = 'transform 0.3s ease';
+            this.style.boxShadow = '0 5px 15px rgba(0,0,0,0.1)';
+        });
+
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+            this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+        });
+    });
+
+    // Confirmation avant suppression
+    const deleteModal = document.getElementById('deleteModal');
+    if (deleteModal) {
+        const deleteButton = deleteModal.querySelector('.btn-danger');
+        deleteButton.addEventListener('click', function(e) {
+            const confirmation = confirm('ÊTES-VOUS ABSOLUMENT SÛR DE VOULOIR SUPPRIMER CE CLIENT ?\n\nCette action est définitive et ne peut pas être annulée.');
+            if (!confirmation) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    }
+});
+</script>
+{% endblock contenu %}

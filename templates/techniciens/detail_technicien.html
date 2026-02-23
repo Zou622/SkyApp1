@@ -1,0 +1,273 @@
+{% extends 'main.html' %}
+{% load static %}
+
+{% block contenu %}
+<div class="content-wrapper">
+    <div class="container mt-4">
+        <div class="card shadow">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-user-tie me-2"></i> Fiche Technicien
+                </h4>
+            </div>
+            
+            <div class="card-body">
+                <div class="row">
+                    <!-- Photo et informations principales -->
+                    <div class="col-md-4 text-center">
+                        <div class="mb-4">
+                            <div class="avatar-circle mx-auto mb-3" 
+                                 style="width: 150px; height: 150px;
+                                        background-image: url('{{ technicien.get_photo_url }}');
+                                        background-size: cover;
+                                        background-position: center;
+                                        border-radius: 50%;
+                                        border: 4px solid #0dcaf0;">
+                            </div>
+                            <h3>{{ technicien.nom }} {{ technicien.prenom }}</h3>
+                            <span class="badge 
+                                {% if technicien.statut == 'actif' %}bg-success
+                                {% elif technicien.statut == 'inactif' %}bg-secondary
+                                {% elif technicien.statut == 'congé' %}bg-warning text-dark
+                                {% elif technicien.statut == 'mission' %}bg-info
+                                {% endif %} fs-6">
+                                {% if technicien.statut == 'actif' %}<i class="fas fa-check-circle me-1"></i>Actif
+                                {% elif technicien.statut == 'inactif' %}<i class="fas fa-times-circle me-1"></i>Inactif
+                                {% elif technicien.statut == 'congé' %}<i class="fas fa-bed me-1"></i>En congé
+                                {% elif technicien.statut == 'mission' %}<i class="fas fa-truck me-1"></i>En mission
+                                {% endif %}
+                            </span>
+                        </div>
+                        
+                        <!-- ID Technicien -->
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title text-muted">ID Technicien</h6>
+                                <h3 class="text-primary">#{{ technicien.id }}</h3>
+                            </div>
+                        </div>
+                        
+                        <!-- Dates importantes -->
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title text-muted">Dates</h6>
+                                <p class="mb-1">
+                                    <i class="fas fa-calendar-alt me-2 text-primary"></i>
+                                    <strong>Embauché:</strong> {{ technicien.date_embauche|date:"d/m/Y" }}
+                                </p>
+                                <p class="mb-1">
+                                    <i class="fas fa-calendar-plus me-2 text-success"></i>
+                                    <strong>Créé:</strong> {{ technicien.date_creation|date:"d/m/Y H:i" }}
+                                </p>
+                                <p class="mb-0">
+                                    <i class="fas fa-calendar-edit me-2 text-warning"></i>
+                                    <strong>Modifié:</strong> {{ technicien.date_modification|date:"d/m/Y H:i" }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Informations détaillées -->
+                    <div class="col-md-8">
+                        <div class="row">
+                            <!-- Informations de contact -->
+                            <div class="col-md-6">
+                                <div class="card mb-4">
+                                    <div class="card-header bg-primary text-white py-2">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-address-card me-2"></i> Contact
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p>
+                                            <i class="fas fa-envelope text-primary me-2"></i>
+                                            <strong>Email:</strong><br>
+                                            <a href="mailto:{{ technicien.email }}" class="text-decoration-none">
+                                                {{ technicien.email }}
+                                            </a>
+                                        </p>
+                                        <p>
+                                            <i class="fas fa-phone text-success me-2"></i>
+                                            <strong>Téléphone:</strong><br>
+                                            <a href="tel:{{ technicien.telephone }}" class="text-decoration-none">
+                                                {{ technicien.telephone }}
+                                            </a>
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Adresse -->
+                                <div class="card mb-4">
+                                    <div class="card-header bg-success text-white py-2">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-map-marker-alt me-2"></i> Localisation
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="mb-2">
+                                            <i class="fas fa-home me-2 text-muted"></i>
+                                            <strong>Adresse:</strong><br>
+                                            {{ technicien.adresse|linebreaks }}
+                                        </p>
+                                        <p class="mb-0">
+                                            <i class="fas fa-map-pin me-2 text-muted"></i>
+                                            <strong>Quartier:</strong><br>
+                                            {{ technicien.quartier|default:"Non spécifié" }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Informations professionnelles -->
+                            <div class="col-md-6">
+                                <div class="card mb-4">
+                                    <div class="card-header bg-warning text-dark py-2">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-briefcase me-2"></i> Professionnel
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="mb-3">
+                                            <i class="fas fa-cogs text-warning me-2"></i>
+                                            <strong>Spécialité:</strong><br>
+                                            {% if technicien.specialite %}
+                                            <span class="badge bg-info fs-6">{{ technicien.specialite }}</span>
+                                            {% else %}
+                                            <span class="text-muted">Non spécifiée</span>
+                                            {% endif %}
+                                        </p>
+                                        
+                                        <div class="mt-4">
+                                            <h6>Statut actuel:</h6>
+                                            <div class="alert 
+                                                {% if technicien.statut == 'actif' %}alert-success
+                                                {% elif technicien.statut == 'inactif' %}alert-secondary
+                                                {% elif technicien.statut == 'congé' %}alert-warning
+                                                {% elif technicien.statut == 'mission' %}alert-info
+                                                {% endif %}">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="me-3">
+                                                        {% if technicien.statut == 'actif' %}
+                                                        <i class="fas fa-check-circle fa-2x"></i>
+                                                        {% elif technicien.statut == 'inactif' %}
+                                                        <i class="fas fa-times-circle fa-2x"></i>
+                                                        {% elif technicien.statut == 'congé' %}
+                                                        <i class="fas fa-bed fa-2x"></i>
+                                                        {% elif technicien.statut == 'mission' %}
+                                                        <i class="fas fa-truck fa-2x"></i>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div>
+                                                        <h5 class="mb-0">
+                                                            {% if technicien.statut == 'actif' %}Technicien Actif
+                                                            {% elif technicien.statut == 'inactif' %}Technicien Inactif
+                                                            {% elif technicien.statut == 'congé' %}En Congé
+                                                            {% elif technicien.statut == 'mission' %}En Mission
+                                                            {% endif %}
+                                                        </h5>
+                                                        <p class="mb-0">
+                                                            {% if technicien.statut == 'actif' %}
+                                                            Le technicien est disponible pour les interventions
+                                                            {% elif technicien.statut == 'inactif' %}
+                                                            Le technicien n'est pas disponible
+                                                            {% elif technicien.statut == 'congé' %}
+                                                            Le technicien est actuellement en congé
+                                                            {% elif technicien.statut == 'mission' %}
+                                                            Le technicien est en intervention sur le terrain
+                                                            {% endif %}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Boutons d'action -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between">
+                                    <a href="{% url 'list_technicien' %}" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left me-1"></i> Retour à la liste
+                                    </a>
+                                    <div>
+                                        <a href="{% url 'modifier_technicien' technicien.id %}" class="btn btn-warning me-2">
+                                            <i class="fas fa-edit me-1"></i> Modifier
+                                        </a>
+                                        <button type="button" 
+                                                class="btn btn-danger" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#deleteModal">
+                                            <i class="fas fa-trash me-1"></i> Supprimer
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de suppression -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i> Confirmation
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Voulez-vous vraiment supprimer le technicien :</p>
+                <p class="h5 text-center my-3">
+                    <strong>{{ technicien.nom }} {{ technicien.prenom }}</strong>
+                </p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <strong>Attention :</strong> Cette action supprimera définitivement toutes les informations de ce technicien.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Annuler
+                </button>
+                <a href="{% url 'supprimer_technicien' technicien.id %}" class="btn btn-danger">
+                    <i class="fas fa-trash me-1"></i> Supprimer définitivement
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-circle {
+    border: 4px solid #dee2e6;
+}
+
+.card {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+}
+
+.alert {
+    border-radius: 8px;
+    border: none;
+}
+
+.badge.fs-6 {
+    font-size: 1rem;
+    padding: 0.5em 1em;
+}
+</style>
+{% endblock contenu %}

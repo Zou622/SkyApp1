@@ -1,0 +1,244 @@
+{% extends 'main.html' %}
+{% load static %}
+
+{% block contenu %}
+<div class="content-wrapper">
+    <div class="container mt-4">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-user-plus me-2"></i> Ajouter un Nouveau Client
+                </h4>
+            </div>
+
+            <div class="card-body">
+                <!-- Message d'information dédié -->
+                <div id="dedieMessage" class="alert alert-info" style="display: none;">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Contrat Dédié :</strong> La bande passante est symétrique.
+                    Les champs Download et Upload seront automatiquement remplis avec la valeur de la Capacité.
+                </div>
+
+                <form method="post" action="{% url 'enregistrer_client' %}" enctype="multipart/form-data" id="clientForm">
+                    {% csrf_token %}
+                    <div class="row">
+                        <!-- Colonne 1 : Infos Client -->
+                        <div class="col-md-6">
+                            <h5 class="border-bottom pb-2 mb-3 text-primary">
+                                <i class="fas fa-user me-2"></i> Informations Client
+                            </h5>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Nom client *</label>
+                                <input type="text" class="form-control" name="nom_client" required>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Adresse</label>
+                                        <textarea class="form-control" name="adresse" rows="3"></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Quartier</label>
+                                        <input type="text" class="form-control" name="quartier">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Téléphone</label>
+                                        <input type="tel" class="form-control" name="telephone">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Email</label>
+                                        <input type="email" class="form-control" name="email">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Type de contrat *</label>
+                                        <select class="form-control" name="type_contrat" id="typeContrat" required>
+                                            <option value="">--- Sélectionner ---</option>
+                                            <option value="dedié">Dédié</option>
+                                            <option value="partagé">Partagé</option>
+                                            <option value="symetrique">symetrique</option>
+                                            <option value="asymetrique">asymetrique</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Statut *</label>
+                                        <select class="form-control" name="statut" required>
+                                            <option value="">--- Sélectionner le statut ---</option>
+                                            <option value="non_actif">Non activé</option>
+                                            <option value="actif">Activé</option>
+                                            <option value="suspendu">Suspendu</option>
+                                            <option value="resilie">Résilié</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Commercial</label>
+                                <select class="form-control" name="commercial_id">
+                                    <option value="">-- Sélectionner un commercial --</option>
+                                    {% for commercial in commerciaux %}
+                                        <option value="{{ commercial.id }}"
+                                        {% if selected_commercial == commercial.id|stringformat:"s" %}selected{% endif %}>
+                                            {{ commercial.prenom }} {{ commercial.nom }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Colonne 2 : Infos techniques -->
+                        <div class="col-md-6">
+                            <h5 class="border-bottom pb-2 mb-3 text-primary">
+                                <i class="fas fa-network-wired me-2"></i> Informations Techniques
+                            </h5>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Adresse IP</label>
+                                        <input type="text" class="form-control" name="adresse_ip" placeholder="Ex: 192.168.1.100">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">VLAN</label>
+                                        <input type="text" class="form-control" name="vlan" placeholder="Ex: 100">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Capacité souscrite *</label>
+                                <input type="number" class="form-control" name="capacite" id="capacite" placeholder="Ex: 100" required>
+                                <small class="text-muted">En Mbps</small>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Download (Mbps)</label>
+                                        <input type="number" class="form-control" name="download" id="download">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Upload (Mbps)</label>
+                                        <input type="number" class="form-control" name="upload" id="upload">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Contrat en PDF</label>
+                                <input type="file" class="form-control" name="contrat_pdf" accept=".pdf">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Boutons -->
+                    <div class="mt-4 border-top pt-3 d-flex justify-content-between">
+                        <a href="{% url 'list_client' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Annuler
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save me-1"></i> Enregistrer le client
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JS Gestion type de contrat -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const typeContratSelect = document.getElementById('typeContrat');
+    const capaciteInput = document.getElementById('capacite');
+    const downloadInput = document.getElementById('download');
+    const uploadInput = document.getElementById('upload');
+    const dedieMessage = document.getElementById('dedieMessage');
+    const clientForm = document.getElementById('clientForm');
+
+    function updateFormForContratType() {
+        const type = typeContratSelect.value;
+        const capacite = capaciteInput.value;
+
+        if(type === 'symetrique'){
+            downloadInput.readOnly = true;
+            uploadInput.readOnly = true;
+            downloadInput.classList.add('bg-light','text-muted');
+            uploadInput.classList.add('bg-light','text-muted');
+            downloadInput.placeholder = "Identique à la capacité";
+            uploadInput.placeholder = "Identique à la capacité";
+            dedieMessage.style.display = 'block';
+            if(capacite){
+                downloadInput.value = capacite;
+                uploadInput.value = capacite;
+            }
+        } else {
+            downloadInput.readOnly = false;
+            uploadInput.readOnly = false;
+            downloadInput.classList.remove('bg-light','text-muted');
+            uploadInput.classList.remove('bg-light','text-muted');
+            downloadInput.placeholder = "";
+            uploadInput.placeholder = "";
+            dedieMessage.style.display = 'none';
+        }
+    }
+
+    typeContratSelect.addEventListener('change', updateFormForContratType);
+
+    capaciteInput.addEventListener('input', function(){
+        if(typeContratSelect.value === 'symetrique'){
+            downloadInput.value = this.value;
+            uploadInput.value = this.value;
+        }
+    });
+
+    clientForm.addEventListener('submit', function(e){
+        const capacite = capaciteInput.value.trim();
+        if(!capacite){
+            alert('La capacité souscrite est obligatoire.');
+            e.preventDefault();
+            return false;
+        }
+        if(typeContratSelect.value === 'symetrique'){
+            downloadInput.value = capacite;
+            uploadInput.value = capacite;
+        }
+    });
+
+    updateFormForContratType();
+});
+</script>
+
+<style>
+.bg-light.text-muted {
+    background-color: #e9ecef !important;
+    color: #6c757d !important;
+}
+.alert-info {
+    border-left: 4px solid #0dcaf0;
+}
+</style>
+{% endblock contenu %}

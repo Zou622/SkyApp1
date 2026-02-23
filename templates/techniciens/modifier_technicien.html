@@ -1,0 +1,255 @@
+{% extends 'main.html' %}
+{% load static %}
+
+{% block contenu %}
+<div class="content-wrapper">
+    <div class="container mt-4">
+        <div class="card shadow">
+            <div class="card-header bg-warning text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-edit me-2"></i> Modifier le Technicien
+                </h4>
+            </div>
+            
+            <div class="card-body">
+                <form method="post" action="{% url 'modifier_technicien' technicien.id %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <!-- Colonne 1 : Informations personnelles -->
+                        <div class="col-md-6">
+                            <h5 class="border-bottom pb-2 mb-3 text-primary">
+                                <i class="fas fa-user me-2"></i> Informations Personnelles
+                            </h5>
+                            
+                            <!-- Photo actuelle -->
+                            <div class="mb-4 text-center">
+                                <div class="avatar-circle mx-auto mb-3" 
+                                     style="width: 120px; height: 120px; 
+                                            background-image: url('{{ technicien.get_photo_url }}');
+                                            background-size: cover;
+                                            background-position: center;
+                                            border-radius: 50%;
+                                            border: 3px solid #0dcaf0;">
+                                </div>
+                                <p class="text-muted small">Photo actuelle</p>
+                            </div>
+                            
+                            <!-- Nom & Prénom -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Nom *</label>
+                                        <input type="text" class="form-control" name="nom" 
+                                               value="{{ technicien.nom }}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Prénom *</label>
+                                        <input type="text" class="form-control" name="prenom" 
+                                               value="{{ technicien.prenom }}" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Email & Téléphone -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Email *</label>
+                                        <input type="email" class="form-control" name="email" 
+                                               value="{{ technicien.email }}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Téléphone *</label>
+                                        <input type="tel" class="form-control" name="telephone" 
+                                               value="{{ technicien.telephone }}" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Nouvelle photo -->
+                            <div class="mb-3">
+                                <label class="form-label">Nouvelle photo</label>
+                                <input type="file" class="form-control" name="photo" accept="image/*">
+                                <small class="text-muted">Laisser vide pour conserver la photo actuelle</small>
+                            </div>
+                            
+                            <!-- Date d'embauche -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Date d'embauche *</label>
+                                <input type="date" class="form-control" name="date_embauche" 
+                                       value="{{ technicien.date_embauche|date:'Y-m-d' }}" required>
+                            </div>
+                        </div>
+                        
+                        <!-- Colonne 2 : Informations professionnelles -->
+                        <div class="col-md-6">
+                            <h5 class="border-bottom pb-2 mb-3 text-primary">
+                                <i class="fas fa-briefcase me-2"></i> Informations Professionnelles
+                            </h5>
+                            
+                            <!-- Spécialité -->
+                            <div class="mb-3">
+                                <label class="form-label">Spécialité</label>
+                                <input type="text" class="form-control" name="specialite" 
+                                       value="{{ technicien.specialite|default:'' }}"
+                                       placeholder="Ex: Fibre optique, ADSL, Wi-Fi">
+                            </div>
+                            
+                            <!-- Statut -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Statut *</label>
+                                <select class="form-control" name="statut" required>
+                                    <option value="actif" {% if technicien.statut == 'actif' %}selected{% endif %}>Actif</option>
+                                    <option value="inactif" {% if technicien.statut == 'inactif' %}selected{% endif %}>Inactif</option>
+                                    <option value="congé" {% if technicien.statut == 'congé' %}selected{% endif %}>En congé</option>
+                                    <option value="mission" {% if technicien.statut == 'mission' %}selected{% endif %}>En mission</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Adresse & Quartier -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Adresse *</label>
+                                <textarea class="form-control" name="adresse" rows="2" required>{{ technicien.adresse }}</textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Quartier *</label>
+                                <input type="text" class="form-control" name="quartier" 
+                                       value="{{ technicien.quartier }}" required>
+                            </div>
+                            
+                            <!-- Informations système -->
+                            <div class="card bg-light mt-4">
+                                <div class="card-body">
+                                    <h6 class="card-title text-muted">
+                                        <i class="fas fa-info-circle me-2"></i> Informations système
+                                    </h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <small>ID:</small><br>
+                                            <strong>#{{ technicien.id }}</strong>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <small>Dernière modification:</small><br>
+                                            <strong>{{ technicien.date_modification|date:"d/m/Y H:i" }}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Boutons -->
+                    <div class="mt-4 border-top pt-3">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <a href="{% url 'detail_technicien' technicien.id %}" class="btn btn-secondary me-2">
+                                    <i class="fas fa-times me-1"></i> Annuler
+                                </a>
+                                <a href="{% url 'list_technicien' %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i> Retour liste
+                                </a>
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="fas fa-save me-1"></i> Enregistrer les modifications
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-control:focus {
+    border-color: #ffc107;
+    box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+}
+
+.card {
+    border-radius: 10px;
+    border: none;
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+}
+
+.bg-light {
+    background-color: #f8f9fa !important;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Prévisualisation de la nouvelle photo
+    const photoInput = document.querySelector('input[name="photo"]');
+    const previewContainer = document.createElement('div');
+    previewContainer.className = 'mt-2 text-center';
+    photoInput.parentNode.appendChild(previewContainer);
+    
+    photoInput.addEventListener('change', function() {
+        previewContainer.innerHTML = '';
+        
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.maxWidth = '120px';
+                img.style.maxHeight = '120px';
+                img.className = 'img-thumbnail mt-2';
+                img.style.borderRadius = '50%';
+                previewContainer.appendChild(img);
+                
+                const text = document.createElement('p');
+                text.className = 'text-muted small mt-2';
+                text.textContent = 'Nouvelle photo';
+                previewContainer.appendChild(text);
+            }
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+    
+    // Validation du formulaire
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const email = document.querySelector('input[name="email"]').value.trim();
+        const telephone = document.querySelector('input[name="telephone"]').value.trim();
+        
+        // Validation de l'email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            alert('Veuillez entrer une adresse email valide.');
+            e.preventDefault();
+            return false;
+        }
+        
+        // Validation du téléphone
+        const phoneRegex = /^[0-9+\-\s]{8,20}$/;
+        if (!phoneRegex.test(telephone)) {
+            alert('Veuillez entrer un numéro de téléphone valide.');
+            e.preventDefault();
+            return false;
+        }
+        
+        // Confirmation avant modification
+        const confirmation = confirm('Êtes-vous sûr de vouloir modifier les informations de ce technicien ?');
+        if (!confirmation) {
+            e.preventDefault();
+            return false;
+        }
+        
+        return true;
+    });
+});
+</script>
+{% endblock contenu %}

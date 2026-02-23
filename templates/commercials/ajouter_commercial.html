@@ -1,0 +1,170 @@
+{% extends 'main.html' %}
+{% block contenu %}
+
+<div class="content-wrapper">
+    <div class="container-fluid mt-4">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white py-3">
+                <h4 class="mb-0">
+                    <i class="fas fa-user-plus me-2"></i> Ajouter un Nouveau Commercial
+                </h4>
+            </div>
+
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <!-- Messages d'erreur/succès -->
+                    {% if messages %}
+                        {% for message in messages %}
+                        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <!-- Ligne 1 : Infos personnelles et professionnelles -->
+                    <div class="row">
+                        <!-- Colonne gauche : Infos personnelles -->
+                        <div class="col-md-6">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-user me-2"></i> Informations Personnelles
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Nom *</label>
+                                    <input type="text" name="nom" class="form-control" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Prénom *</label>
+                                    <input type="text" name="prenom" class="form-control" required>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Téléphone *</label>
+                                    <input type="text" name="telephone" class="form-control" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Email</label>
+                                    <input type="email" name="email" class="form-control"
+                                           placeholder="Ex: jean@entreprise.com">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Colonne droite : Infos professionnelles -->
+                        <div class="col-md-6">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-briefcase me-2"></i> Informations Professionnelles
+                            </h5>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Spécialité</label>
+                                    <select name="specialite" class="form-control">
+                                        {% for code, label in specialites %}
+                                        <option value="{{ code }}">{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Taux de commission (%)</label>
+                                    <input type="number" name="taux_commission" class="form-control"
+                                           value="10.00" step="0.01" min="0" max="100">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Date d'embauche</label>
+                                    <input type="date" name="date_embauche" class="form-control">
+                                </div>
+                                <div class="col-md-6 mb-3 d-flex align-items-center">
+                                    <div class="form-check mt-2">
+                                        <input type="checkbox" name="est_actif" class="form-check-input" id="est_actif" checked>
+                                        <label class="form-check-label fw-bold" for="est_actif">
+                                            Commercial actif
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ligne 2 : Adresse complète -->
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Quartier</label>
+                                    <input type="text" name="quartier" class="form-control" placeholder="Ex: kipé">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Adresse</label>
+                                    <textarea name="adresse" class="form-control" rows="3"
+                                              placeholder="Adresse complète..."></textarea>
+                                </div>
+                    </div>
+
+                    <!-- Boutons -->
+                    <div class="d-flex justify-content-end mt-4 pt-3 border-top">
+                        <a href="{% url 'list_commercial' %}" class="btn btn-secondary me-2">
+                            <i class="fas fa-times me-1"></i> Annuler
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save me-1"></i> Enregistrer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Validation JS -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(event){
+        const nom = form.querySelector('input[name="nom"]').value.trim();
+        const prenom = form.querySelector('input[name="prenom"]').value.trim();
+        const telephone = form.querySelector('input[name="telephone"]').value.trim();
+
+        if(!nom || !prenom || !telephone){
+            event.preventDefault();
+            alert('Veuillez remplir les champs obligatoires : Nom, Prénom et Téléphone.');
+            return false;
+        }
+    });
+});
+</script>
+
+<!-- Styles -->
+<style>
+.card-header.bg-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0069d9 100%);
+}
+
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+}
+
+.form-control:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40,167,69,.25);
+}
+
+.form-check-input:checked {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+</style>
+
+{% endblock contenu %}

@@ -1,0 +1,309 @@
+{% extends 'main.html' %}
+{% load static %}
+
+{% block contenu %}
+<div class="content-wrapper">
+    <div class="container-fluid mt-4">
+        <div class="card shadow">
+            <!-- En-tête -->
+            <div class="card-header bg-primary text-white py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-calendar-alt me-2"></i> Liste des Activités
+                    </h4>
+                    <div class="d-flex align-items-center">
+                        <!-- Filtres -->
+                        <form method="get" class="d-flex me-3">
+                            <select name="type" class="form-control form-control-sm me-2" style="width: 180px;" onchange="this.form.submit()">
+                                <option value="">Tous les types</option>
+                                {% for code, label in types_activite %}
+                                <option value="{{ code }}" {% if type_filter == code %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            
+                            <select name="statut" class="form-control form-control-sm me-2" style="width: 150px;" onchange="this.form.submit()">
+                                <option value="">Tous statuts</option>
+                                {% for code, label in statuts %}
+                                <option value="{{ code }}" {% if statut_filter == code %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            
+                            <input type="date" name="date" class="form-control form-control-sm me-2" style="width: 180px;" 
+                                   value="{{ date_filter }}" onchange="this.form.submit()">
+                            
+                            <div class="input-group input-group-sm" style="width: 200px;">
+                                <input type="text" 
+                                       name="search" 
+                                       class="form-control form-control-sm" 
+                                       placeholder="Rechercher..."
+                                       value="{{ search_query }}">
+                                <button class="btn btn-light btn-sm" type="submit">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                                {% if search_query or statut_filter or date_filter or type_filter %}
+                                <a href="{% url 'list_activite' %}" class="btn btn-light btn-sm">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </form>
+                        
+                        <div class="btn-group me-2">
+                            <a href="{% url 'calendrier_activites' %}" class="btn btn-light btn-sm">
+                                <i class="fas fa-calendar me-1"></i> Calendrier
+                            </a>
+                            <a href="{% url 'activites_aujourdhui' %}" class="btn btn-light btn-sm">
+                                <i class="fas fa-sun me-1"></i> Aujourd'hui
+                            </a>
+                        </div>
+                        
+                        <a href="{% url 'ajouter_activite' %}" class="btn btn-light btn-sm">
+                            <i class="fas fa-plus me-1"></i> Nouvelle activité
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Statistiques -->
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="d-flex flex-wrap gap-2">
+                            <span class="badge bg-light text-dark">
+                                <i class="fas fa-list me-1"></i> Total: {{ stats.total }}
+                            </span>
+                            <span class="badge bg-info">
+                                <i class="fas fa-calendar-day me-1"></i> Aujourd'hui: {{ stats.aujourdhui }}
+                            </span>
+                            <span class="badge bg-primary">
+                                <i class="fas fa-clock me-1"></i> Planifié: {{ stats.planifie }}
+                            </span>
+                            <span class="badge bg-warning text-dark">
+                                <i class="fas fa-play me-1"></i> En cours: {{ stats.en_cours }}
+                            </span>
+                            <span class="badge bg-success">
+                                <i class="fas fa-check me-1"></i> Terminé: {{ stats.termine }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Corps -->
+            <div class="card-body p-0">
+                {% if activites %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="60">ID</th>
+                                <th>Date & Heure</th>
+                                <th>Client</th>
+                                <th>Type d'activité</th>
+                                <th>Technicien</th>
+                                <th>Statut</th>
+                                <th width="100" class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for activite in activites %}
+                            <tr>
+                                <!-- ID -->
+                                <td class="text-center">
+                                    <span class="badge bg-secondary">#{{ activite.id }}</span>
+                                </td>
+                                
+                                <!-- Date et heure -->
+                                <td>
+                                    <div class="fw-bold">{{ activite.date_activite|date:"d/m/Y" }}</div>
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>
+                                        {% if activite.heure_debut %}
+                                            {{ activite.heure_debut|time:"H:i" }}
+                                        {% else %}
+                                            --
+                                        {% endif %}
+                                    </small>
+                                </td>
+                                
+                                <!-- Client -->
+                                <td>
+                                    <h6 class="mb-0">{{ activite.client.nom_client }}</h6>
+                                    <small class="text-muted">
+                                        {% if activite.lieu %}
+                                        <i class="fas fa-map-marker-alt me-1"></i>{{ activite.lieu|truncatechars:20 }}
+                                        {% endif %}
+                                    </small>
+                                </td>
+                                
+                                <!-- Type d'activité -->
+                                <td>
+                                    <span class="badge bg-secondary {{ activite.type_activite_badge_class }}">
+                                        {{ activite.get_type_activite_display }}
+                                    </span>
+                                </td>
+                                
+                                <!-- Technicien -->
+                                <td>
+                                    {% if activite.techniciens.all %}
+                                        {% for tech in activite.techniciens.all %}
+                                            <span class="badge bg-info text-dark">
+                                                {{ tech.nom }} {{ tech.prenom }}
+                                            </span>
+                                        {% endfor %}
+                                    {% else %}
+                                        <span class="text-muted">Non assigné</span>
+                                    {% endif %}
+                                </td>
+                                
+                                <!-- Statut -->
+                                <td>
+                                    <span class="badge bg-primary text-dark {{ activite.statut_badge_class }}">
+                                        {{ activite.get_statut_display }}
+                                    </span>
+                                </td>
+                                
+                                <!-- Actions -->
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{% url 'detail_activite' activite.id %}" 
+                                           class="btn btn-outline-primary" title="Détails">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'modifier_activite' activite.id %}" 
+                                           class="btn btn-outline-warning" title="Modifier">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" 
+                                                class="btn btn-outline-danger"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteModal{{ activite.id }}"
+                                                title="Supprimer">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+
+
+                                    </div>
+                                    
+                                    <!-- Modal de suppression -->
+                                    <div class="modal fade" id="deleteModal{{ activite.id }}" tabindex="-1">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-header bg-danger text-white">
+                                                    <h5 class="modal-title">
+                                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                                        Confirmation
+                                                    </h5>
+                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>Supprimer l'activité du <strong>{{ activite.date_activite|date:"d/m/Y" }}</strong> pour <strong>{{ activite.client.nom_client }}</strong> ?</p>
+                                                    <p class="text-danger"><small>Cette action est irréversible !</small></p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                                    <form method="post" action="{% url 'supprimer_activite' activite.id %}" class="d-inline">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-danger">
+                                                            <i class="fas fa-trash"></i> Supprimer
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <!-- Message si aucune activité -->
+                <div class="text-center py-5">
+                    <i class="fas fa-calendar-alt fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted mb-3">Aucune activité trouvée</h4>
+                    <p class="text-muted mb-4">Commencez par planifier votre première activité</p>
+                    <a href="{% url 'ajouter_activite' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Planifier une activité
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Pied de page avec pagination -->
+            <div class="card-footer">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Page {{ activites.number }} sur {{ activites.paginator.num_pages }}
+                            • {{ activites.paginator.count }} activité{{ activites.paginator.count|pluralize:"s" }}
+                        </span>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if activites.has_other_pages %}
+                    <nav aria-label="Pagination">
+                        <ul class="pagination pagination-sm mb-0">
+                            {% if activites.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ activites.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if statut_filter %}&statut={{ statut_filter }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if date_filter %}&date={{ date_filter }}{% endif %}">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for i in activites.paginator.page_range %}
+                                {% if activites.number == i %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ i }}</span>
+                                </li>
+                                {% elif i > activites.number|add:'-3' and i < activites.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ i }}{% if search_query %}&search={{ search_query }}{% endif %}{% if statut_filter %}&statut={{ statut_filter }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if date_filter %}&date={{ date_filter }}{% endif %}">{{ i }}</a>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if activites.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ activites.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if statut_filter %}&statut={{ statut_filter }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if date_filter %}&date={{ date_filter }}{% endif %}">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card-header.bg-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.pagination .page-link {
+    color: #007bff;
+}
+
+.badge.bg-primary { background-color: #007bff !important; }
+.badge.bg-success { background-color: #28a745 !important; }
+.badge.bg-danger { background-color: #dc3545 !important; }
+.badge.bg-warning { background-color: #ffc107 !important; }
+.badge.bg-info { background-color: #17a2b8 !important; }
+.badge.bg-secondary { background-color: #6c757d !important; }
+</style>
+
+{% endblock contenu %}

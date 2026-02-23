@@ -1,0 +1,223 @@
+{% extends 'main.html' %}
+{% block contenu %}
+
+<div class="content-wrapper">
+    <div class="container-fluid mt-4">
+        <div class="card">
+            <div class="card-header bg-warning text-white py-3">
+                <h4 class="mb-0">
+                    <i class="fas fa-edit me-2"></i> Modifier le Commercial
+                </h4>
+            </div>
+
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    <!-- Messages -->
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                    
+                    <div class="row">
+                        <!-- Colonne gauche -->
+                        <div class="col-md-6">
+                            <h5 class="text-warning mb-3">
+                                <i class="fas fa-user me-2"></i>Informations Personnelles
+                            </h5>
+                            
+                            <!-- Nom -->
+                            <div class="form-group mb-3">
+                                <label class="form-label fw-bold">Nom *</label>
+                                <input type="text" 
+                                       name="nom" 
+                                       class="form-control" 
+                                       value="{{ commercial.nom }}"
+                                       required>
+                            </div>
+                            
+                            <!-- Prénom -->
+                            <div class="form-group mb-3">
+                                <label class="form-label fw-bold">Prénom *</label>
+                                <input type="text" 
+                                       name="prenom" 
+                                       class="form-control" 
+                                       value="{{ commercial.prenom }}"
+                                       required>
+                            </div>
+                            
+                            <!-- Téléphone -->
+                            <div class="form-group mb-3">
+                                <label class="form-label fw-bold">Téléphone *</label>
+                                <input type="text" 
+                                       name="telephone" 
+                                       class="form-control" 
+                                       value="{{ commercial.telephone }}"
+                                       required>
+                            </div>
+                            
+                            <!-- Email -->
+                            <div class="form-group mb-3">
+                                <label class="form-label fw-bold">Email</label>
+                                <input type="email" 
+                                       name="email" 
+                                       class="form-control" 
+                                       value="{{ commercial.email|default:'' }}">
+                            </div>
+                        </div>
+                        
+                        <!-- Colonne droite -->
+                        <div class="col-md-6">
+                            <h5 class="text-warning mb-3">
+                                <i class="fas fa-briefcase me-2"></i>Informations Professionnelles
+                            </h5>
+                            
+                            <!-- Spécialité -->
+                            <div class="form-group mb-3">
+                                <label class="form-label fw-bold">Spécialité</label>
+                                <select name="specialite" class="form-control">
+                                    {% for code, label in specialites %}
+                                    <option value="{{ code }}" 
+                                            {% if commercial.specialite == code %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <!-- Taux de commission -->
+                            <div class="form-group mb-3">
+                                <label class="form-label fw-bold">Taux de commission (%)</label>
+                                <input type="number" 
+                                       name="taux_commission" 
+                                       class="form-control" 
+                                       value="{{ commercial.taux_commission }}"
+                                       step="0.01"
+                                       min="0"
+                                       max="100">
+                            </div>
+                            
+                            <!-- Date d'embauche -->
+                            <div class="form-group mb-3">
+                                <label class="form-label fw-bold">Date d'embauche</label>
+                                <input type="date" 
+                                       name="date_embauche" 
+                                       class="form-control" 
+                                       value="{{ commercial.date_embauche|date:'Y-m-d' }}">
+                            </div>
+                            
+                            <!-- Statut actif -->
+                            <div class="form-group mb-3">
+                                <div class="form-check">
+                                    <input type="checkbox" 
+                                           name="est_actif" 
+                                           class="form-check-input" 
+                                           id="est_actif" 
+                                           {% if commercial.est_actif %}checked{% endif %}>
+                                    <label class="form-check-label fw-bold" for="est_actif">
+                                        Commercial actif
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Deuxième ligne : Adresse -->
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <h5 class="text-warning mb-3">
+                                <i class="fas fa-map-marker-alt me-2"></i>Localisation
+                            </h5>
+                            
+                            <!-- Quartier -->
+                            <div class="form-group mb-3">
+                                <label class="form-label fw-bold">Quartier</label>
+                                <input type="text" 
+                                       name="quartier" 
+                                       class="form-control" 
+                                       value="{{ commercial.quartier|default:'' }}">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h5 class="text-warning mb-3">
+                                <i class="fas fa-home me-2"></i>Adresse complète
+                            </h5>
+                            
+                            <!-- Adresse -->
+                            <div class="form-group mb-3">
+                                <label class="form-label fw-bold">Adresse</label>
+                                <textarea name="adresse" 
+                                          class="form-control" 
+                                          rows="3">{{ commercial.adresse|default:'' }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Informations complémentaires -->
+                    <div class="alert alert-light border mt-4">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <small class="text-muted">Date de création</small>
+                                <div class="fw-bold">{{ commercial.date_creation|date:"d/m/Y H:i" }}</div>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted">Dernière modification</small>
+                                <div class="fw-bold">{{ commercial.date_modification|date:"d/m/Y H:i" }}</div>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted">Ancienneté</small>
+                                <div class="fw-bold">{{ commercial.anciennete }} an{{ commercial.anciennete|pluralize:"s" }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Boutons d'action -->
+                    <div class="form-group mt-4 pt-3 border-top">
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'detail_commercial' commercial.id %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Retour aux détails
+                            </a>
+                            <div>
+                                <a href="{% url 'list_commercial' %}" class="btn btn-secondary me-2">
+                                    <i class="fas fa-times me-1"></i> Annuler
+                                </a>
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="fas fa-save me-1"></i> Mettre à jour
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card-header.bg-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+}
+
+.text-warning {
+    color: #ffc107 !important;
+}
+
+.btn-warning {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+}
+
+.form-control:focus {
+    border-color: #ffc107;
+    box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+}
+</style>
+
+{% endblock contenu %}

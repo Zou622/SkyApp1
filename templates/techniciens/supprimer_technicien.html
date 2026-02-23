@@ -1,0 +1,193 @@
+{% extends 'main.html' %}
+{% load static %}
+
+{% block contenu %}
+<div class="content-wrapper">
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-danger text-white text-center py-4">
+                        <h3 class="mb-0">
+                            <i class="fas fa-exclamation-triangle fa-2x me-2"></i>
+                            Confirmation de suppression
+                        </h3>
+                    </div>
+                    
+                    <div class="card-body text-center py-5">
+                        <!-- Icône d'avertissement -->
+                        <div class="mb-4">
+                            <i class="fas fa-user-slash fa-5x text-danger mb-3"></i>
+                            <h2 class="text-danger">ATTENTION !</h2>
+                        </div>
+                        
+                        <!-- Informations du technicien -->
+                        <div class="alert alert-warning">
+                            <h5 class="alert-heading">
+                                <i class="fas fa-user-tie me-2"></i>
+                                Vous êtes sur le point de supprimer :
+                            </h5>
+                            <hr>
+                            <div class="my-4">
+                                <div class="avatar-circle mx-auto mb-3" 
+                                     style="width: 80px; height: 80px; 
+                                            background-image: url('{{ technicien.get_photo_url }}');
+                                            background-size: cover;
+                                            background-position: center;
+                                            border-radius: 50%;">
+                                </div>
+                                <h4 class="text-danger">
+                                    <strong>{{ technicien.nom }} {{ technicien.prenom }}</strong>
+                                </h4>
+                                <p class="mb-1">ID: <span class="badge bg-dark">#{{ technicien.id }}</span></p>
+                                <p class="mb-0">{{ technicien.email }}</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Détails du technicien -->
+                        <div class="card mb-4">
+                            <div class="card-body text-start">
+                                <h6><i class="fas fa-info-circle me-2 text-info"></i>Informations :</h6>
+                                <ul class="list-unstyled ms-3">
+                                    <li><strong>Téléphone :</strong> {{ technicien.telephone }}</li>
+                                    <li><strong>Spécialité :</strong> {{ technicien.specialite|default:"Non spécifiée" }}</li>
+                                    <li><strong>Statut :</strong> 
+                                        <span class="badge 
+                                            {% if technicien.statut == 'actif' %}bg-success
+                                            {% elif technicien.statut == 'inactif' %}bg-secondary
+                                            {% elif technicien.statut == 'congé' %}bg-warning text-dark
+                                            {% elif technicien.statut == 'mission' %}bg-info
+                                            {% endif %}">
+                                            {{ technicien.get_statut_display }}
+                                        </span>
+                                    </li>
+                                    <li><strong>Embauché le :</strong> {{ technicien.date_embauche|date:"d/m/Y" }}</li>
+                                    <li><strong>Quartier :</strong> {{ technicien.quartier }}</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- Avertissement -->
+                        <div class="alert alert-danger" role="alert">
+                            <div class="d-flex">
+                                <div class="me-3">
+                                    <i class="fas fa-radiation fa-2x"></i>
+                                </div>
+                                <div>
+                                    <h5 class="alert-heading">Action irréversible !</h5>
+                                    <p class="mb-0">
+                                        Toutes les informations de ce technicien seront définitivement supprimées 
+                                        de la base de données. Cette action ne peut pas être annulée.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Formulaire de confirmation -->
+                        <form method="post">
+                            {% csrf_token %}
+                            
+                            <div class="d-grid gap-3 mt-4">
+                                <!-- Bouton Annuler -->
+                                <a href="{% url 'detail_technicien' technicien.id %}" 
+                                   class="btn btn-lg btn-outline-secondary">
+                                    <i class="fas fa-times-circle me-2"></i>
+                                    Non, annuler l'opération
+                                </a>
+                                
+                                <!-- Bouton Confirmer -->
+                                <button type="submit" 
+                                        class="btn btn-lg btn-danger"
+                                        onclick="return confirm('ÊTES-VOUS ABSOLUMENT SÛR ?\\n\\nCette action supprimera définitivement le technicien \\\"{{ technicien.nom }} {{ technicien.prenom }}\\\".\\n\\nCette action ne peut pas être annulée !')">
+                                    <i class="fas fa-trash-alt me-2"></i>
+                                    Oui, supprimer définitivement
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <!-- Note de sécurité -->
+                        <div class="mt-4 text-muted">
+                            <small>
+                                <i class="fas fa-shield-alt me-1"></i>
+                                Pour des raisons de sécurité, cette action nécessite une double confirmation.
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer text-center text-muted py-3">
+                        <small>
+                            <i class="fas fa-history me-1"></i>
+                            Créé le {{ technicien.date_creation|date:"d/m/Y à H:i" }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border-radius: 15px;
+    border: none;
+}
+
+.card-header {
+    border-radius: 15px 15px 0 0 !important;
+}
+
+.avatar-circle {
+    border: 3px solid #dee2e6;
+}
+
+.btn-lg {
+    padding: 0.75rem 2rem;
+    font-weight: 500;
+    border-radius: 10px;
+}
+
+.btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+    transition: all 0.3s ease;
+}
+
+.alert {
+    border-radius: 10px;
+    border: none;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    border-left: 4px solid #ffc107;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border-left: 4px solid #dc3545;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Désactiver le bouton après le premier clic pour éviter les doubles clics
+    const deleteButton = document.querySelector('button[type="submit"]');
+    
+    deleteButton.addEventListener('click', function(e) {
+        // Première confirmation via JavaScript
+        const confirmation = confirm(`⚠️ CONFIRMATION FINALE\n\nVoulez-vous vraiment supprimer le technicien :\n\n"${this.form.querySelector('strong').textContent}" ?\n\nCette action est définitive et toutes les données seront perdues.`);
+        
+        if (!confirmation) {
+            e.preventDefault();
+            return false;
+        }
+        
+        // Désactiver le bouton après confirmation
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Suppression en cours...';
+        
+        return true;
+    });
+});
+</script>
+{% endblock contenu %}

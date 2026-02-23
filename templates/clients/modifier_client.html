@@ -1,0 +1,720 @@
+{% extends 'main.html' %}
+{% load static %}
+
+{% block contenu %}
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark"></h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-12">
+                <div class="card shadow">
+                    <div class="card-header bg-warning text-white">
+                        <h4 class="mb-0">
+                            <i class="fas fa-edit me-2"></i> Modifier le Client
+                        </h4>
+                        <small class="opacity-75">ID: #{{ client.id }} | Créé le: {{ client.date_creation|date:"d/m/Y" }}</small>
+                    </div>
+
+                    <div class="card-body">
+                        <form method="post" action="{% url 'modifier_client' client.id %}" enctype="multipart/form-data" id="clientForm">
+                            {% csrf_token %}
+
+                            <div class="row">
+                                <!-- Informations client -->
+                                <div class="col-md-6">
+                                    <h5 class="border-bottom pb-2 mb-3 text-primary">
+                                        <i class="fas fa-user me-2"></i> Informations Client
+                                    </h5>
+
+                                    <div class="mb-3">
+                                        <label for="nom_client" class="form-label fw-bold">Nom client *</label>
+                                        <input type="text" class="form-control" id="nom_client"
+                                               name="nom_client" value="{{ client.nom_client }}" required>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="adresse" class="form-label fw-bold">Adresse *</label>
+                                                <textarea class="form-control" id="adresse" name="adresse"
+                                                          rows="2" required>{{ client.adresse }}</textarea>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="quartier" class="form-label fw-bold">Quartier</label>
+                                                <input type="text" class="form-control" id="quartier"
+                                                       name="quartier" value="{{ client.quartier|default:'' }}">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="telephone" class="form-label fw-bold">Téléphone</label>
+                                                <input type="tel" class="form-control" id="telephone"
+                                                       name="telephone" value="{{ client.telephone|default:'' }}">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="email" class="form-label fw-bold">Email</label>
+                                                <input type="email" class="form-control" id="email"
+                                                       name="email" value="{{ client.email|default:'' }}">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="statut" class="form-label fw-bold">Statut</label>
+                                                <select class="form-select" id="statut" name="statut">
+                                                    <option value="non_actif" {% if client.statut == 'non_actif' %}selected{% endif %}>Non activé</option>
+                                                    <option value="actif" {% if client.statut == 'actif' %}selected{% endif %}>Activé</option>
+                                                    <option value="suspendu" {% if client.statut == 'suspendu' %}selected{% endif %}>Suspendu</option>
+                                                    <option value="resilie" {% if client.statut == 'resilie' %}selected{% endif %}>Résilié</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold">Commercial</label>
+                                                <select class="form-control" name="commercial_id">
+                                                    <option value="">-- Sélectionner un commercial --</option>
+                                                    {% for commercial in commerciaux %}
+                                                        <option value="{{ commercial.id }}"
+                                                        {% if selected_commercial == commercial.id|stringformat:"s" %}selected{% endif %}>
+                                                            {{ commercial.prenom }} {{ commercial.nom }}
+                                                        </option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Informations Techniques -->
+                                <div class="col-md-6">
+                                    <h5 class="border-bottom pb-2 mb-3 text-primary">
+                                        <i class="fas fa-network-wired me-2"></i> Informations Techniques
+                                    </h5>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="vlan" class="form-label fw-bold">VLAN</label>
+                                                <input type="text" class="form-control" id="vlan"
+                                                       name="vlan" value="{{ client.vlan|default:'' }}">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="adresse_ip" class="form-label fw-bold">Adresse IP</label>
+                                                <input type="text" class="form-control" id="adresse_ip"
+                                                       name="adresse_ip" value="{{ client.adresse_ip|default:'' }}">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Type de contrat amélioré -->
+                                    <div class="mb-3">
+                                        <label for="type_contrat" class="form-label fw-bold">
+                                            <i class="fas fa-file-contract me-1"></i> Type de contrat *
+                                        </label>
+                                        <select class="form-select form-select-lg" id="type_contrat" name="type_contrat" required>
+                                            <option value="" disabled {% if not client.type_contrat %}selected{% endif %}>
+                                                ─── Sélectionnez un type de contrat ───
+                                            </option>
+                                            <optgroup label="Connexions dédiées">
+                                                <option value="dedie" class="py-2" {% if client.type_contrat == 'dedie' %}selected{% endif %}>
+                                                    Dédié
+                                                </option>
+                                                <option value="symetrique" class="py-2" {% if client.type_contrat == 'symetrique' %}selected{% endif %}>
+                                                    Symétrique
+                                                </option>
+                                            </optgroup>
+                                            <optgroup label="Connexions partagées">
+                                                <option value="partage" class="py-2" {% if client.type_contrat == 'partage' %}selected{% endif %}>
+                                                    Partagé
+                                                </option>
+                                                <option value="asymetrique" class="py-2" {% if client.type_contrat == 'asymetrique' %}selected{% endif %}>
+                                                    Asymétrique
+                                                </option>
+                                            </optgroup>
+                                            <optgroup label="Autres">
+                                                <option value="autre" class="py-2" {% if client.type_contrat == 'autre' %}selected{% endif %}>
+                                                    Autre
+                                                </option>
+                                            </optgroup>
+                                        </select>
+                                        <div class="form-text text-muted mt-2" id="typeContratHelp">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            <span id="contratDescription">
+                                                {% if client.type_contrat == 'dedie' %}
+                                                    Dédié - Bande passante exclusive et garantie, idéal pour les entreprises
+                                                {% elif client.type_contrat == 'partage' %}
+                                                    Partagé - Ressources mutualisées, économique pour un usage standard
+                                                {% elif client.type_contrat == 'symetrique' %}
+                                                    Symétrique - Débits identiques en Download et Upload, parfait pour la visioconférence
+                                                {% elif client.type_contrat == 'asymetrique' %}
+                                                    Asymétrique - Download > Upload, idéal pour la navigation et streaming
+                                                {% elif client.type_contrat == 'autre' %}
+                                                    Autre - Configuration personnalisée
+                                                {% else %}
+                                                    Sélectionnez un type de contrat pour voir sa description
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="mb-3">
+                                                <label for="capacite" class="form-label fw-bold">Capacité (Mbps) *</label>
+                                                <input type="text" class="form-control" id="capacite"
+                                                       name="capacite" value="{{ client.capacite|default:'' }}" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="mb-3">
+                                                <label for="download" class="form-label fw-bold">Download (Mbps)</label>
+                                                <input type="text" class="form-control" id="download"
+                                                       name="download" value="{{ client.download|default:'' }}">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="mb-3">
+                                                <label for="upload" class="form-label fw-bold">Upload (Mbps)</label>
+                                                <input type="text" class="form-control" id="upload"
+                                                       name="upload" value="{{ client.upload|default:'' }}">
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+
+                                    <!-- Contrat PDF -->
+                                    <div class="mb-3">
+                                        <label for="contrat_pdf" class="form-label fw-bold">
+                                            <i class="fas fa-file-pdf me-1 text-danger"></i> Contrat en PDF
+                                        </label>
+                                        <div class="input-group">
+                                            <input type="file" class="form-control" id="contrat_pdf" name="contrat_pdf"
+                                                   accept=".pdf">
+                                            {% if client.contrat_pdf %}
+                                            <button type="button" class="btn btn-outline-danger"
+                                                    onclick="window.open('{{ client.contrat_pdf.url }}', '_blank')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                        {% if client.contrat_pdf %}
+                                        <div class="mt-2">
+                                            <div class="alert alert-info py-2 mb-0">
+                                                <small>
+                                                    <i class="fas fa-info-circle me-1"></i>
+                                                    Fichier actuel: <strong>{{ client.contrat_pdf.name|cut:"client_contrats/" }}</strong>
+                                                    <br>
+                                                    <a href="{{ client.contrat_pdf.url }}" target="_blank" class="text-primary">
+                                                        <i class="fas fa-external-link-alt me-1"></i>Ouvrir le PDF
+                                                    </a>
+                                                </small>
+                                            </div>
+                                        </div>
+                                        {% else %}
+                                        <div class="mt-2">
+                                            <div class="alert alert-warning py-2 mb-0">
+                                                <small>
+                                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                                    Aucun contrat PDF n'est actuellement attaché
+                                                </small>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Informations système -->
+                                    <div class="mt-3 p-3 bg-light rounded border">
+                                        <h6 class="text-secondary mb-2">
+                                            <i class="fas fa-database me-2"></i>Informations système
+                                        </h6>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-1">
+                                                    <small class="text-muted d-block">ID Client</small>
+                                                    <span class="badge bg-secondary">#{{ client.id }}</span>
+                                                </div>
+                                                <div class="mb-1">
+                                                    <small class="text-muted d-block">Date création</small>
+                                                    <strong>{{ client.date_creation|date:"d/m/Y" }}</strong>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-1">
+                                                    <small class="text-muted d-block">Dernière modification</small>
+                                                    <strong>
+                                                        {% if client.date_modification %}
+                                                            {{ client.date_modification|date:"d/m/Y H:i" }}
+                                                        {% else %}
+                                                            {{ client.date_creation|date:"d/m/Y H:i" }}
+                                                        {% endif %}
+                                                    </strong>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Boutons d'action -->
+                            <div class="mt-4 border-top pt-4">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <a href="{% url 'list_client' %}" class="btn btn-secondary">
+                                            <i class="fas fa-arrow-left me-1"></i> Retour à la liste
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger ms-2"
+                                                data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                            <i class="fas fa-trash me-1"></i> Supprimer
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <a href="{% url 'detail_client' client.id %}" class="btn btn-outline-primary me-2">
+                                            <i class="fas fa-eye me-1"></i> Voir détails
+                                        </a>
+                                        <button type="submit" class="btn btn-warning px-4">
+                                            <i class="fas fa-save me-1"></i> Enregistrer
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmation de suppression -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle me-2"></i> Confirmer la suppression
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-3">
+                        <i class="fas fa-trash-alt fa-3x text-danger mb-3"></i>
+                        <h5 class="text-danger">Suppression du client</h5>
+                    </div>
+                    <p>Vous êtes sur le point de supprimer définitivement :</p>
+                    <div class="alert alert-danger text-center">
+                        <h5 class="mb-0">"{{ client.nom_client }}"</h5>
+                        <small class="text-muted">ID: #{{ client.id }}</small>
+                    </div>
+                    <p class="text-center mt-3">
+                        <small class="text-danger">
+                            <i class="fas fa-exclamation-circle me-1"></i>
+                            Cette action est irréversible et supprimera toutes les données associées.
+                        </small>
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i> Annuler
+                    </button>
+                    <form method="post" action="{% url 'supprimer_client' client.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-1"></i> Confirmer la suppression
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-label.fw-bold {
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .form-control, .form-select {
+        border-radius: 0.375rem;
+        border: 1px solid #ced4da;
+        padding: 0.5rem 0.75rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #ffc107;
+        box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25);
+    }
+
+    .card-header {
+        border-radius: 0.5rem 0.5rem 0 0;
+    }
+
+    .border-bottom {
+        border-bottom: 2px solid #dee2e6 !important;
+    }
+
+    .alert-info {
+        background-color: #d1ecf1;
+        border-color: #bee5eb;
+    }
+
+    .alert-warning {
+        background-color: #fff3cd;
+        border-color: #ffeaa7;
+    }
+
+    .bg-light {
+        background-color: #f8f9fa !important;
+    }
+
+    /* Amélioration visuelle du select */
+    .form-select-lg {
+        font-size: 1rem;
+        padding: 0.75rem 1rem;
+    }
+
+    .form-select optgroup {
+        font-weight: 600;
+        color: #495057;
+        background-color: #f8f9fa;
+        padding: 0.5rem;
+    }
+
+    .form-select option {
+        padding: 0.5rem;
+        font-weight: normal;
+    }
+
+    .form-select option:hover {
+        background-color: #fff3cd;
+    }
+
+    .form-select option:checked {
+        background-color: #ffc107;
+        color: #000;
+    }
+
+    .selected-group {
+        background-color: #f8f9fa;
+        border-left: 3px solid #ffc107;
+    }
+
+    /* Badges de type de contrat */
+    .contrat-badge {
+        display: inline-block;
+        padding: 0.35rem 0.65rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        border-radius: 50rem;
+    }
+
+    /* Animation pour le message d'info */
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    #contratInfo:not(.d-none) {
+        animation: slideDown 0.3s ease-out;
+    }
+
+    /* Style pour le texte d'aide */
+    .form-text {
+        font-size: 0.875rem;
+        background-color: #f8f9fa;
+        padding: 0.5rem;
+        border-radius: 0.375rem;
+        border-left: 3px solid #ffc107;
+    }
+
+    /* Style pour les champs désactivés */
+    .form-control:disabled, .form-control[readonly] {
+        background-color: #e9ecef;
+        color: #6c757d;
+        cursor: not-allowed;
+    }
+
+    /* Style pour les erreurs de validation */
+    .is-invalid {
+        border-color: #dc3545 !important;
+    }
+
+    .invalid-feedback {
+        display: block;
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const typeContratSelect = document.getElementById('type_contrat');
+        const capaciteInput = document.getElementById('capacite');
+        const downloadInput = document.getElementById('download');
+        const uploadInput = document.getElementById('upload');
+        const contratInfo = document.getElementById('contratInfo');
+        const contratMessage = document.getElementById('contratMessage');
+        const contratDescription = document.getElementById('contratDescription');
+
+        // Configuration des types de contrat
+        const contratConfig = {
+            'dedie': {
+                description: '💎 Dédié - Bande passante exclusive et garantie, idéal pour les entreprises',
+                fields: {
+                    download: 'disabled',
+                    upload: 'disabled',
+                    message: 'Pour un contrat dédié, Download et Upload sont basés sur la capacité',
+                    alertType: 'info'
+                }
+            },
+            'symetrique': {
+                description: '⚖️ Symétrique - Débits identiques en Download et Upload, parfait pour la visioconférence',
+                fields: {
+                    download: 'disabled',
+                    upload: 'disabled',
+                    message: 'Contrat symétrique : Download et Upload = Capacité',
+                    alertType: 'info'
+                }
+            },
+            'partage': {
+                description: '🔄 Partagé - Ressources mutualisées, économique pour un usage standard',
+                fields: {
+                    download: 'enabled',
+                    upload: 'enabled',
+                    message: 'Contrat partagé : vous pouvez personnaliser Download et Upload',
+                    alertType: 'warning'
+                }
+            },
+            'asymetrique': {
+                description: '📊 Asymétrique - Download > Upload, idéal pour la navigation et streaming',
+                fields: {
+                    download: 'enabled',
+                    upload: 'enabled',
+                    message: 'Contrat asymétrique : généralement Download plus élevé',
+                    alertType: 'warning'
+                }
+            },
+            'autre': {
+                description: '📌 Autre - Configuration personnalisée',
+                fields: {
+                    download: 'enabled',
+                    upload: 'enabled',
+                    message: 'Configuration libre des débits',
+                    alertType: 'secondary'
+                }
+            }
+        };
+
+        // Fonction pour mettre à jour les champs selon le type de contrat
+        function updateFieldsForContract(type) {
+            const config = contratConfig[type];
+
+            if (!config) {
+                // Type non sélectionné ou invalide
+                enableField(downloadInput);
+                enableField(uploadInput);
+                contratInfo.classList.add('d-none');
+                contratDescription.textContent = 'Sélectionnez un type de contrat pour voir sa description';
+                return;
+            }
+
+            // Mettre à jour la description
+            contratDescription.textContent = config.description;
+
+            // Configurer les champs
+            if (config.fields.download === 'disabled') {
+                disableField(downloadInput);
+                disableField(uploadInput);
+
+                if (capaciteInput.value.trim()) {
+                    downloadInput.value = capaciteInput.value;
+                    uploadInput.value = capaciteInput.value;
+                }
+            } else {
+                enableField(downloadInput);
+                enableField(uploadInput);
+            }
+
+            // Afficher le message d'information
+            contratInfo.classList.remove('d-none', 'alert-info', 'alert-warning', 'alert-secondary');
+            contratInfo.classList.add(`alert-${config.alertType}`);
+            contratMessage.textContent = config.message;
+
+            // Style visuel de l'option sélectionnée
+            highlightSelectedOption(type);
+        }
+
+        // Fonctions utilitaires
+        function disableField(field) {
+            field.disabled = true;
+            field.classList.add('bg-light', 'text-muted');
+            field.setAttribute('readonly', true);
+        }
+
+        function enableField(field) {
+            field.disabled = false;
+            field.classList.remove('bg-light', 'text-muted');
+            field.removeAttribute('readonly');
+        }
+
+        function highlightSelectedOption(type) {
+            // Retirer la classe de tous les optgroup
+            document.querySelectorAll('optgroup').forEach(opt => {
+                opt.classList.remove('selected-group');
+            });
+
+            // Ajouter une classe à l'optgroup contenant l'option sélectionnée
+            const selectedOption = typeContratSelect.querySelector(`option[value="${type}"]`);
+            if (selectedOption && selectedOption.parentElement) {
+                selectedOption.parentElement.classList.add('selected-group');
+            }
+        }
+
+        // Écouter les changements sur le type de contrat
+        typeContratSelect.addEventListener('change', function() {
+            updateFieldsForContract(this.value);
+        });
+
+        // Écouter les changements sur la capacité
+        capaciteInput.addEventListener('input', function() {
+            const type = typeContratSelect.value;
+            if (type && contratConfig[type] && contratConfig[type].fields.download === 'disabled') {
+                downloadInput.value = this.value;
+                uploadInput.value = this.value;
+            }
+        });
+
+        // Initialisation
+        if (typeContratSelect.value) {
+            updateFieldsForContract(typeContratSelect.value);
+        }
+
+        // Validation du formulaire
+        const form = document.getElementById('clientForm');
+        form.addEventListener('submit', function(e) {
+            const type = typeContratSelect.value;
+            let isValid = true;
+
+            // Supprimer les anciens messages d'erreur
+            document.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
+            document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+
+            if (!type) {
+                e.preventDefault();
+                showFieldError(typeContratSelect, 'Veuillez sélectionner un type de contrat');
+                isValid = false;
+            }
+
+            if (!capaciteInput.value.trim()) {
+                e.preventDefault();
+                showFieldError(capaciteInput, 'La capacité est requise');
+                isValid = false;
+            }
+
+            // Validation spécifique selon le type
+            if (type === 'partage' || type === 'asymetrique' || type === 'autre') {
+                if (!downloadInput.value.trim()) {
+                    e.preventDefault();
+                    showFieldError(downloadInput, 'Le champ Download est requis pour ce type de contrat');
+                    isValid = false;
+                }
+                if (!uploadInput.value.trim()) {
+                    e.preventDefault();
+                    showFieldError(uploadInput, 'Le champ Upload est requis pour ce type de contrat');
+                    isValid = false;
+                }
+            }
+
+            if (!isValid) {
+                e.preventDefault();
+            }
+        });
+
+        function showFieldError(field, message) {
+            field.classList.add('is-invalid');
+            const feedback = document.createElement('div');
+            feedback.className = 'invalid-feedback';
+            feedback.textContent = message;
+            field.parentNode.appendChild(feedback);
+        }
+
+        // Nettoyer les erreurs lors de la saisie
+        document.querySelectorAll('input, select').forEach(field => {
+            field.addEventListener('input', function() {
+                this.classList.remove('is-invalid');
+                const feedback = this.parentNode.querySelector('.invalid-feedback');
+                if (feedback) feedback.remove();
+            });
+        });
+
+        // Afficher le nom du fichier PDF sélectionné
+        const pdfInput = document.getElementById('contrat_pdf');
+        if (pdfInput) {
+            pdfInput.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    const fileName = this.files[0].name;
+                    if (!fileName.toLowerCase().endsWith('.pdf')) {
+                        alert('Veuillez sélectionner un fichier PDF');
+                        this.value = '';
+                    }
+                }
+            });
+        }
+
+        // Gestion des messages de succès/erreur
+        {% if messages %}
+            {% for message in messages %}
+                showAlert("{{ message.tags }}", "{{ message }}");
+            {% endfor %}
+        {% endif %}
+    });
+
+    function showAlert(type, message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show position-fixed`;
+        alertDiv.style.top = '20px';
+        alertDiv.style.right = '20px';
+        alertDiv.style.zIndex = '9999';
+        alertDiv.style.minWidth = '300px';
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(alertDiv);
+
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 5000);
+    }
+</script>
+
+{% endblock %}

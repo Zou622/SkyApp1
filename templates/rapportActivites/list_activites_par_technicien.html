@@ -1,0 +1,191 @@
+{% extends 'main.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title">
+                        <i class="fas fa-tasks me-2"></i>
+                        Mes activités - {{ technicien.prenom }} {{ technicien.nom }}
+                    </h3>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Statistiques -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="small-box bg-info">
+                                <div class="inner">
+                                    <h3>{{ stats.total }}</h3>
+                                    <p>Activités totales</p>
+                                </div>
+                                <div class="icon">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="small-box bg-warning">
+                                <div class="inner">
+                                    <h3>{{ stats.planifie }}</h3>
+                                    <p>Planifiées</p>
+                                </div>
+                                <div class="icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="small-box bg-success">
+                                <div class="inner">
+                                    <h3>{{ stats.termine }}</h3>
+                                    <p>Terminées</p>
+                                </div>
+                                <div class="icon">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="small-box bg-danger">
+                                <div class="inner">
+                                    <h3>{{ stats.rapports_manquants }}</h3>
+                                    <p>Rapports manquants</p>
+                                </div>
+                                <div class="icon">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Filtres -->
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <select class="form-select" id="filtreStatut" onchange="window.location.href = '?statut=' + this.value">
+                                <option value="">Tous les statuts</option>
+                                <option value="planifie" {% if statut_actuel == 'planifie' %}selected{% endif %}>📅 Planifié</option>
+                                <option value="en_cours" {% if statut_actuel == 'en_cours' %}selected{% endif %}>🔄 En cours</option>
+                                <option value="termine" {% if statut_actuel == 'termine' %}selected{% endif %}>✅ Terminé</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Liste des activités -->
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Client</th>
+                                    <th>Lieu</th>
+                                    <th>Statut</th>
+                                    <th>Rapport</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for activite in activites %}
+                                <tr>
+                                    <td>{{ activite.date_activite|date:"d/m/Y" }}</td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if activite.type_activite == 'investigation' %}bg-info
+                                            {% elif activite.type_activite == 'installation' %}bg-success
+                                            {% elif activite.type_activite == 'maintenance' %}bg-warning
+                                            {% else %}bg-secondary{% endif %}">
+                                            {{ activite.get_type_activite_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ activite.client.nom_client }}</td>
+                                    <td>{{ activite.lieu|default:"-" }}</td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if activite.statut == 'planifie' %}bg-secondary
+                                            {% elif activite.statut == 'en_cours' %}bg-primary
+                                            {% elif activite.statut == 'termine' %}bg-success
+                                            {% elif activite.statut == 'annule' %}bg-danger
+                                            {% elif activite.statut == 'reporte' %}bg-warning
+                                            {% endif %}">
+                                            {{ activite.get_statut_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if activite.rapport %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check"></i> Fait
+                                            </span>
+                                        {% else %}
+                                            {% if activite.statut == 'termine' %}
+                                                <span class="badge bg-danger">
+                                                    <i class="fas fa-exclamation"></i> Manquant
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">-</span>
+                                            {% endif %}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if activite.rapport %}
+                                            <a href="{% url 'detail_rapport' activite.rapport.id %}" class="btn btn-sm btn-info">
+                                                <i class="fas fa-eye"></i> Voir
+                                            </a>
+                                        {% else %}
+                                            {% if activite.statut == 'termine' %}
+                                                <a href="{% url 'creer_rapport_activite' activite.id %}" class="btn btn-sm btn-warning">
+                                                    <i class="fas fa-edit"></i> Rapport
+                                                </a>
+                                            {% else %}
+                                                <a href="{% url 'demarrer_activite' activite.id %}" class="btn btn-sm btn-success">
+                                                    <i class="fas fa-play"></i> Démarrer
+                                                </a>
+                                            {% endif %}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center">Aucune activité trouvée</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.small-box {
+    border-radius: 0.25rem;
+    box-shadow: 0 0 1px rgba(0,0,0,.125), 0 1px 3px rgba(0,0,0,.2);
+    display: block;
+    margin-bottom: 20px;
+    position: relative;
+    padding: 20px;
+    color: #fff;
+}
+
+.small-box > .inner {
+    padding: 10px;
+}
+
+.small-box > .icon {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 70px;
+    opacity: 0.3;
+}
+
+.table td, .table th {
+    vertical-align: middle;
+}
+</style>
+{% endblock %}

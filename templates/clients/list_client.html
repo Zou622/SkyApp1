@@ -1,0 +1,460 @@
+{% extends 'main.html' %}
+{% load static %}
+{% block contenu %}
+
+<div class="content-wrapper">
+    <div class="container-fluid mt-4">
+        <div class="card">
+            <!-- En-tête style commercial -->
+            <div class="card-header bg-primary text-white py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-users me-2"></i> Liste des Clients
+                    </h4>
+                    <div class="d-flex align-items-center">
+                        <!-- Recherche et filtres -->
+                        <div class="me-3" style="min-width: 400px;">
+                            <form method="get" action="{% url 'list_client' %}">
+                                <div class="row g-2 align-items-center">
+                                    <!-- Filtre par statut -->
+                                    <div class="col-md-4">
+                                        <select name="statut" class="form-select form-select-sm" onchange="this.form.submit()">
+                                            <option value="">Tous les statuts</option>
+                                            <option value="actif" {% if request.GET.statut == 'actif' %}selected{% endif %}>Activé</option>
+                                            <option value="suspendu" {% if request.GET.statut == 'suspendu' %}selected{% endif %}>Suspendu</option>
+                                            <option value="resilie" {% if request.GET.statut == 'resilie' %}selected{% endif %}>Résilié</option>
+                                            <option value="non_actif" {% if request.GET.statut == 'non_actif' %}selected{% endif %}>Non activé</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Recherche par texte -->
+                                    <div class="col-md-6">
+                                        <div class="input-group input-group-sm">
+                                            <input type="text"
+                                                   name="search"
+                                                   class="form-control form-control-sm"
+                                                   placeholder="Rechercher..."
+                                                   value="{{ search_query|default:'' }}">
+                                            <button class="btn btn-light btn-sm" type="submit">
+                                                <i class="fas fa-search"></i>
+                                            </button>
+                                            {% if search_query or request.GET.statut %}
+                                            <a href="{% url 'list_client' %}" class="btn btn-light btn-sm" title="Effacer">
+                                                <i class="fas fa-times"></i>
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Bouton Ajouter -->
+                        <a href="{% url 'ajouter_client' %}" class="btn btn-light btn-sm">
+                            <i class="fas fa-user-plus me-1"></i> Ajouter
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Indicateur de filtre actif -->
+                {% if search_query or statut_filter %}
+                <div class="mt-2">
+                    <small>
+                        <i class="fas fa-filter me-1"></i>
+                        {% if search_query %}
+                        <span class="badge bg-info me-2">"{{ search_query }}"</span>
+                        {% endif %}
+                        {% if statut_filter %}
+                        <span class="badge
+                            {% if statut_filter == 'actif' %}bg-success
+                            {% elif statut_filter == 'suspendu' %}bg-warning text-dark
+                            {% elif statut_filter == 'resilie' %}bg-danger
+                            {% else %}bg-secondary{% endif %} me-2">
+                            Statut: {{ statut_filter|title }}
+                        </span>
+                        {% endif %}
+                        | {{ clients.paginator.count }} résultat{{ clients.paginator.count|pluralize }}
+                    </small>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Cartes de statistiques -->
+            <div class="card-body py-2">
+                <div class="row g-2">
+                    <!-- Carte Total Clients -->
+                    <div class="col-md-3">
+                        <div class="card border-0 bg-gradient-primary text-white">
+                            <div class="card-body py-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3">
+                                        <i class="fas fa-users fa-2x opacity-75"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">Total Clients</h6>
+                                        <h4 class="mb-0">{{ total_clients }}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Carte Clients Actifs -->
+                    <div class="col-md-3">
+                        <div class="card border-0 bg-gradient-success text-white">
+                            <div class="card-body py-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3">
+                                        <i class="fas fa-check-circle fa-2x opacity-75"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">Actifs</h6>
+                                        <h4 class="mb-0">{{ actif_count }}</h4>
+                                        <small>{{ actif_pourcentage }}%</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Carte Clients Suspendus -->
+                    <div class="col-md-3">
+                        <div class="card border-0 bg-gradient-warning text-dark">
+                            <div class="card-body py-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3">
+                                        <i class="fas fa-pause-circle fa-2x opacity-75"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">Suspendus</h6>
+                                        <h4 class="mb-0">{{ suspendu_count }}</h4>
+                                        <small>{{ suspendu_pourcentage }}%</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Carte Clients Résiliés -->
+                    <div class="col-md-3">
+                        <div class="card border-0 bg-gradient-danger text-white">
+                            <div class="card-body py-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3">
+                                        <i class="fas fa-times-circle fa-2x opacity-75"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">Résiliés</h6>
+                                        <h4 class="mb-0">{{ resilie_count }}</h4>
+                                        <small>{{ resilie_pourcentage }}%</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Corps avec tableau -->
+            <div class="card-body p-0">
+                {% if clients %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="80" class="text-center">ID</th>
+                                <th>Client</th>
+                                <th>Contact</th>
+                                <th>Statut</th>
+                                <th>Commercial</th>
+                                <th>Type Contrat</th>
+                                <th>Download/Upload</th>
+                                <th>Contrat PDF</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for client in clients %}
+                            <tr>
+                                <!-- ID -->
+                                <td class="text-center">
+                                    <span class="badge bg-success rounded-pill px-3">#{{ client.id }}</span>
+                                </td>
+
+                                <!-- Client -->
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0">
+                                            <div class="rounded-circle bg-success d-flex align-items-center justify-content-center"
+                                                 style="width: 40px; height: 40px;">
+                                                <i class="fas fa-user text-white"></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3 position-relative">
+                                            <!-- Nom cliquable avec menu -->
+                                            <a href="#"
+                                               class="text-dark fw-bold dropdown-toggle"
+                                               id="dropdownClient{{ client.id }}"
+                                               data-bs-toggle="dropdown"
+                                               aria-expanded="false">
+                                                {{ client.nom_client }}
+                                            </a>
+                                            <ul class="dropdown-menu" aria-labelledby="dropdownClient{{ client.id }}">
+                                                <li>
+                                                    <a class="dropdown-item" href="{% url 'ajouter_activite_avec_client' client.id %}">
+                                                        <i class="fas fa-plus-circle me-2 text-success"></i> Nouvelle activité
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="{% url 'liste_activites_client' client.id %}"
+                                                       class="dropdown-item">
+                                                        <i class="fas fa-list me-2"></i> Liste activité
+                                                    </a>
+
+                                                </li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li>
+                                                    <a class="dropdown-item text-danger" href="{% url 'supprimer_client' client.id %}">
+                                                        <i class="fas fa-trash me-2"></i> Supprimer le client
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Contact -->
+                                <td>
+                                    <div class="small">
+                                        {% if client.telephone %}
+                                        <div>
+                                            <i class="fas fa-phone me-1 text-muted"></i>
+                                            <a href="tel:{{ client.telephone }}" class="text-decoration-none text-dark">
+                                                {{ client.telephone }}
+                                            </a>
+                                        </div>
+                                        {% endif %}
+                                        {% if client.email %}
+                                        <div>
+                                            <i class="fas fa-envelope me-1 text-muted"></i>
+                                            <a href="mailto:{{ client.email }}" class="text-decoration-none text-dark">
+                                                {{ client.email|truncatechars:20 }}
+                                            </a>
+                                        </div>
+                                        {% endif %}
+                                        {% if not client.telephone and not client.email %}
+                                        <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+
+                                <!-- Statut -->
+                                <td>
+                                    {% if client.statut == 'actif' %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check-circle me-1"></i> Activé
+                                    </span>
+                                    {% elif client.statut == 'suspendu' %}
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="fas fa-pause-circle me-1"></i> Suspendu
+                                    </span>
+                                    {% elif client.statut == 'resilie' %}
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-times-circle me-1"></i> Résilié
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">
+                                        <i class="fas fa-clock me-1"></i> Non activé
+                                    </span>
+                                    {% endif %}
+
+                                    <br>
+                                    <small class="text-muted">
+                                        {% if client.statut == 'actif' and client.date_activation %}
+                                        Depuis {{ client.date_activation|date:"d/m/Y" }}
+                                        {% elif client.statut == 'suspendu' and client.date_suspension %}
+                                        Depuis {{ client.date_suspension|date:"d/m/Y" }}
+                                        {% elif client.statut == 'resilie' and client.date_resiliation %}
+                                        Depuis {{ client.date_resiliation|date:"d/m/Y" }}
+                                        {% endif %}
+                                    </small>
+                                </td>
+
+                                <!-- Commercial-->
+                                <td>
+                                    {% if client.commercial %}
+                                        <span class="text-truncate d-inline-block"
+                                              style="max-width: 150px;"
+                                              title="{{ client.commercial.prenom }} {{ client.commercial.nom }}">
+                                            {{ client.commercial.prenom }} {{ client.commercial.nom }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+
+                                <!-- Type Contrat -->
+                                <td>
+                                    <span class="badge
+                                        {% if client.type_contrat == 'didié' %}bg-secondary
+                                        {% elif client.type_contrat == 'partagé' %}bg-warning text-dark
+                                        {% else %}bg-light text-dark{% endif %}">
+                                        {{ client.type_contrat|default:"-" }}
+                                    </span>
+                                </td>
+
+                                <!-- Download/Upload -->
+                                <td>
+                                    <div class="small text-dark">
+                                        <div>
+                                            <i class="fas fa-download text-success me-1"></i>
+                                            {{ client.download|default:"-" }}
+                                        </div>
+                                        <div>
+                                            <i class="fas fa-upload text-info me-1"></i>
+                                            {{ client.upload|default:"-" }}
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Contrat PDF -->
+                                <td>
+                                    {% if client.contrat_pdf %}
+                                    <a href="{% url 'voir_pdf' client.id %}"
+                                       target="_blank"
+                                       class="btn btn-sm btn-outline-danger"
+                                       title="Voir PDF">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </a>
+                                    {% else %}
+                                    <span class="text-muted small">-</span>
+                                    {% endif %}
+                                </td>
+
+                                <!-- Actions -->
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{% url 'detail_client' client.id %}"
+                                           class="btn btn-outline-success" title="Voir">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'modifier_client' client.id %}"
+                                           class="btn btn-outline-warning" title="Modifier">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button"
+                                                class="btn btn-outline-danger"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteModal{{ client.id }}"
+                                                title="Supprimer">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Modal de suppression -->
+                            <div class="modal fade" id="deleteModal{{ client.id }}" tabindex="-1">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-danger text-white">
+                                            <h5 class="modal-title">
+                                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                                Confirmation
+                                            </h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p class="text-dark">Supprimer le client <strong>"{{ client.nom_client }}"</strong> ?</p>
+                                            <p class="text-danger"><small>Cette action est irréversible !</small></p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                            <a href="{% url 'supprimer_client' client.id %}" class="btn btn-danger">
+                                                <i class="fas fa-trash me-1"></i> Supprimer
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <!-- Message si aucun client -->
+                <div class="text-center py-5">
+                    <i class="fas fa-users fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">Aucun client enregistré</h4>
+                    <p class="text-muted">Commencez par ajouter votre premier client</p>
+                    <a href="{% url 'ajouter_client' %}" class="btn btn-success">
+                        <i class="fas fa-plus me-2"></i> Ajouter un client
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Pied de page avec pagination -->
+            <div class="card-footer">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Page {{ clients.number }} sur {{ clients.paginator.num_pages }}
+                            • Total: <strong>{{ clients.paginator.count }}</strong> client{{ clients.paginator.count|pluralize:"s" }}
+                        </span>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if clients.has_other_pages %}
+                    <nav aria-label="Pagination">
+                        <ul class="pagination justify-content-center mb-0">
+                            {% if clients.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link text-dark" href="?page={{ clients.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if statut_filter %}&statut={{ statut_filter }}{% endif %}">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            {% endif %}
+
+                            {% for i in page_range|default:clients.paginator.page_range %}
+                                {% if clients.number == i %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ i }}</span>
+                                </li>
+                                {% elif i > clients.number|add:'-3' and i < clients.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link text-dark" href="?page={{ i }}{% if search_query %}&search={{ search_query }}{% endif %}{% if statut_filter %}&statut={{ statut_filter }}{% endif %}">{{ i }}</a>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if clients.has_next %}
+                            <li class="page-item">
+                                <a class="page-link text-dark" href="?page={{ clients.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if statut_filter %}&statut={{ statut_filter }}{% endif %}">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock contenu %}

@@ -1,0 +1,291 @@
+{% extends 'main.html' %}
+{% load static %}
+{% block contenu %}
+
+<div class="content-wrapper">
+    <div class="container-fluid mt-4">
+        <div class="card">
+            <!-- En-tête -->
+            <div class="card-header bg-primary text-white py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-tie me-2"></i> Liste des Commerciaux
+                    </h4>
+                    <div class="d-flex align-items-center">
+                        <!-- Recherche -->
+                        <form method="get" action="{% url 'list_commercial' %}" class="me-3">
+                            <div class="input-group input-group-sm" style="width: 200px;">
+                                <input type="text"
+                                       name="search"
+                                       class="form-control form-control-sm"
+                                       placeholder="Rechercher..."
+                                       value="{{ search_query|default:'' }}">
+                                <button class="btn btn-light btn-sm" type="submit">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </form>
+
+                        <a href="{% url 'ajouter_commercial' %}" class="btn btn-light btn-sm">
+                            <i class="fas fa-user-plus me-1"></i> Ajouter
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Corps avec tableau -->
+            <div class="card-body p-0">
+                {% if commerciaux %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="80" class="text-center">ID</th>
+                                <th>Commercial</th>
+                                <th>Contact</th>
+                                <th>Spécialité</th>
+                                <th>Commission</th>
+                                <th>Statut</th>
+                                <th width="100" class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for commercial in commerciaux %}
+                            <tr>
+                                <!-- ID -->
+                                <td class="text-center">
+                                    <span class="badge bg-success rounded-pill px-3">#{{ commercial.id }}</span>
+                                </td>
+
+                                <!-- Nom complet -->
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0">
+                                            <div class="rounded-circle bg-success d-flex align-items-center justify-content-center"
+                                                 style="width: 40px; height: 40px;">
+                                                <i class="fas fa-user-tie text-white"></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h6 class="mb-0">{{ commercial.prenom }} {{ commercial.nom }}</h6>
+                                            <small class="text-muted">
+                                                {% if commercial.date_embauche %}
+                                                <i class="fas fa-calendar-alt me-1"></i>
+                                                {{ commercial.date_embauche|date:"d/m/Y" }}
+                                                {% endif %}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Contact -->
+                                <td>
+                                    <div class="small">
+                                        <div><i class="fas fa-phone me-1 text-muted"></i> {{ commercial.telephone }}</div>
+                                        {% if commercial.email %}
+                                        <div><i class="fas fa-envelope me-1 text-muted"></i> {{ commercial.email|truncatechars:20 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </td>
+
+                                <!-- Spécialité -->
+                                <td>
+                                    <span class="badge
+                                        {% if commercial.specialite == 'reseau' %}bg-primary
+                                        {% elif commercial.specialite == 'vente' %}bg-warning text-dark
+                                        {% elif commercial.specialite == 'technique' %}bg-info
+                                        {% elif commercial.specialite == 'gestion' %}bg-secondary
+                                        {% else %}bg-light text-dark{% endif %}">
+                                        {{ commercial.get_specialite_display }}
+                                    </span>
+                                </td>
+
+                                <!-- Commission -->
+                                <td>
+                                    <span class="fw-bold text-success">{{ commercial.taux_commission }}%</span>
+                                </td>
+
+                                <!-- Statut -->
+                                <td>
+                                    {% if commercial.est_actif %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check-circle me-1"></i> Actif
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-times-circle me-1"></i> Inactif
+                                    </span>
+                                    {% endif %}
+                                </td>
+
+                                <!-- Actions -->
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{% url 'detail_commercial' commercial.id %}"
+                                           class="btn btn-outline-success" title="Voir">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'modifier_commercial' commercial.id %}"
+                                           class="btn btn-outline-warning" title="Modifier">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button"
+                                                class="btn btn-outline-danger"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteModal{{ commercial.id }}"
+                                                title="Supprimer">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Modal de suppression -->
+                            <div class="modal fade" id="deleteModal{{ commercial.id }}" tabindex="-1">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-danger text-white">
+                                            <h5 class="modal-title">
+                                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                                Confirmation
+                                            </h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>Supprimer le commercial <strong>"{{ commercial.prenom }} {{ commercial.nom }}"</strong> ?</p>
+                                            <p class="text-danger"><small>Cette action est irréversible !</small></p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                            <form method="post" action="{% url 'supprimer_commercial' commercial.id %}" class="d-inline">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-danger">
+                                                    <i class="fas fa-trash"></i> Supprimer
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <!-- Message si aucun commercial -->
+                <div class="text-center py-5">
+                    <i class="fas fa-user-tie fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">Aucun commercial enregistré</h4>
+                    <p class="text-muted">Commencez par ajouter votre premier commercial</p>
+                    <a href="{% url 'ajouter_commercial' %}" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Ajouter un commercial
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Pied de page avec pagination -->
+            <div class="card-footer">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Total: <strong>{{ commerciaux|length }}</strong> commercial{{ commerciaux|pluralize:"aux" }}
+                        </span>
+                    </div>
+                    <div>
+                        <!-- Pagination -->
+                        {% if commerciaux.has_other_pages %}
+                        <nav aria-label="Pagination">
+                            <ul class="pagination justify-content-center mb-0">
+                                <!-- Bouton Précédent -->
+                                {% if commerciaux.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ commerciaux.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                                {% else %}
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" tabindex="-1">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                                {% endif %}
+
+                                <!-- Pages -->
+                                {% for i in commerciaux.paginator.page_range %}
+                                    {% if commerciaux.number == i %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ i }}</span>
+                                    </li>
+                                    {% elif i > commerciaux.number|add:'-3' and i < commerciaux.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ i }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ i }}</a>
+                                    </li>
+                                    {% endif %}
+                                {% endfor %}
+
+                                <!-- Bouton Suivant -->
+                                {% if commerciaux.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ commerciaux.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                                {% else %}
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" tabindex="-1">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Styles -->
+<style>
+.card-header.bg-success {
+    background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+}
+
+.badge.bg-success.rounded-pill {
+    background-color: #28a745 !important;
+}
+
+.rounded-circle.bg-success {
+    background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+}
+
+.btn-outline-success {
+    border-color: #28a745;
+    color: #28a745;
+}
+
+.btn-outline-success:hover {
+    background-color: #28a745;
+    color: white;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.pagination .page-link {
+    color: #28a745;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(40, 167, 69, 0.05);
+}
+</style>
+
+{% endblock contenu %}

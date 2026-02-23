@@ -1,0 +1,305 @@
+{% extends 'main.html' %}
+{% load static %}
+
+{% block contenu %}
+<div class="content-wrapper">
+    <div class="container mt-4" style="max-width: 950px;">
+        <div class="card shadow">
+            <div class="card-header bg-info text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-calendar-alt me-2"></i> Détails de l'Activité
+                    </h4>
+                    <div>
+                        <a href="{% url 'list_activite' %}" class="btn btn-light btn-sm me-2">
+                            <i class="fas fa-arrow-left me-1"></i> Retour
+                        </a>
+
+                        <a href="{% url 'modifier_activite' activite.id %}" class="btn btn-warning btn-sm me-2">
+                            <i class="fas fa-edit me-1"></i> Modifier
+                        </a>
+
+                        <button type="button" 
+                                class="btn btn-danger btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#deleteModal">
+                            <i class="fas fa-trash me-1"></i> Supprimer
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-body">
+                <!-- En-tête avec statut -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-info d-flex align-items-center justify-content-center me-3" 
+                                     style="width: 60px; height: 60px;">
+                                    <i class="fas fa-tools text-white fa-2x"></i>
+                                </div>
+                                <div>
+                                    <h2 class="mb-1">{{ activite.get_type_activite_display }}</h2>
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge {{ activite.statut_badge_class }} fs-6 me-3">
+                                            {{ activite.get_statut_display }}
+                                        </span>
+                                        <span class="text-muted">
+                                            <i class="fas fa-calendar me-1"></i> {{ activite.date_activite|date:"l d F Y" }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <span class="badge bg-secondary fs-6">ID: #{{ activite.id }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <!-- Colonne gauche : Client et Technicien -->
+                    <div class="col-md-6">
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-user me-2"></i> Client concerné
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="me-3">
+                                        <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center" 
+                                             style="width: 50px; height: 50px;">
+                                            <i class="fas fa-user text-white"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-1">{{ activite.client.nom_client }}</h5>
+                                        <div class="text-muted small">
+                                            {% if activite.client.telephone %}
+                                            <i class="fas fa-phone me-1"></i>{{ activite.client.telephone }}<br>
+                                            {% endif %}
+                                            {% if activite.client.quartier %}
+                                            <i class="fas fa-map-marker-alt me-1"></i>{{ activite.client.quartier }}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <a href="{% url 'detail_client' activite.client.id %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye me-1"></i> Voir fiche client
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-user-cog me-2"></i> Techniciens assignés
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                {% if activite.techniciens.exists %}
+                                    {% for tech in activite.techniciens.all %}
+                                        <div class="d-flex align-items-center mb-3 p-2 border rounded">
+                                            <div class="me-3">
+                                                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center"
+                                                     style="width: 50px; height: 50px;">
+                                                    <i class="fas fa-user-cog text-white"></i>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-1 fw-bold">
+                                                    {{ tech.prenom }} {{ tech.nom }}
+                                                </h6>
+
+                                                <div class="text-muted small">
+                                                    {% if tech.telephone %}
+                                                        <i class="fas fa-phone me-1"></i> {{ tech.telephone }}<br>
+                                                    {% endif %}
+
+                                                    {% if tech.specialite %}
+                                                        <i class="fas fa-tag me-1"></i> {{ tech.get_specialite_display }}
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="alert alert-warning mb-0">
+                                        <i class="fas fa-exclamation-circle me-2"></i>
+                                        Aucun technicien assigné à cette activité
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                    </div>
+                    
+                    <!-- Colonne droite : Informations de l'activité -->
+                    <div class="col-md-6">
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-clock me-2"></i> Horaires
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="text-center p-3 border rounded">
+                                            <small class="text-muted d-block">Début</small>
+                                            <span class="h4">
+                                                {% if activite.heure_debut %}
+                                                {{ activite.heure_debut|time:"H:i" }}
+                                                {% else %}
+                                                --
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="text-center p-3 border rounded">
+                                            <small class="text-muted d-block">Fin</small>
+                                            <span class="h4">
+                                                {% if activite.heure_fin %}
+                                                {{ activite.heure_fin|time:"H:i" }}
+                                                {% else %}
+                                                --
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 mt-3">
+                                        <div class="alert alert-info mb-0">
+                                            <i class="fas fa-hourglass-half me-2"></i>
+                                            <strong>Durée estimée :</strong> {{ activite.duree_activite }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-map-marker-alt me-2"></i> Lieu d'intervention
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                {% if activite.lieu %}
+                                <h6>{{ activite.lieu }}</h6>
+                                {% else %}
+                                <p class="text-muted mb-0">Non spécifié</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Description détaillée -->
+                <div class="row mt-2">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-align-left me-2"></i> Description détaillée
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                {% if activite.description %}
+                                <div class="p-3 bg-light rounded">
+                                    {{ activite.description|linebreaks }}
+                                </div>
+                                {% else %}
+                                <p class="text-muted fst-italic mb-0">Aucune description fournie</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+
+                <!-- Métadonnées -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="alert alert-light border mb-0">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <small class="text-muted d-block">Date de création</small>
+                                    <span>{{ activite.date_creation|date:"d/m/Y à H:i" }}</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <small class="text-muted d-block">Dernière modification</small>
+                                    <span>{{ activite.date_modification|date:"d/m/Y à H:i" }}</span>
+                                </div>
+                                {% if activite.cree_par %}
+                                <div class="col-12 mt-2">
+                                    <small class="text-muted d-block">Créé par</small>
+                                    <span>{{ activite.cree_par.username }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de suppression -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Confirmation de suppression
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Voulez-vous vraiment supprimer cette activité ?</p>
+                <div class="alert alert-warning">
+                    <strong>{{ activite.get_type_activite_display }}</strong> pour <strong>{{ activite.client.nom_client }}</strong>
+                    <br>
+                    <small>Date: {{ activite.date_activite|date:"d/m/Y" }}</small>
+                </div>
+                <p class="text-danger mb-0"><small>Cette action est irréversible !</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <form method="post" action="{% url 'supprimer_activite' activite.id %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-1"></i> Confirmer la suppression
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card-header.bg-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+}
+
+.rounded-circle.bg-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+}
+
+.badge.bg-primary { background-color: #007bff !important; }
+.badge.bg-success { background-color: #28a745 !important; }
+.badge.bg-danger { background-color: #dc3545 !important; }
+.badge.bg-warning { background-color: #ffc107 !important; }
+.badge.bg-secondary { background-color: #6c757d !important; }
+</style>
+
+
+
+
+
+{% endblock contenu %}

@@ -1,0 +1,167 @@
+{% extends 'main.html' %}
+{% load static %}
+{% block contenu %}
+
+<div class="content-wrapper">
+    <div class="container mt-4">
+        <div class="card shadow">
+            <div class="card-header bg-warning text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-edit me-2"></i> Modifier l'Activité
+                </h4>
+            </div>
+
+            <div class="card-body">
+                <form method="post" action="{% url 'modifier_activite' activite.id %}" >
+                    {% csrf_token %}
+
+                    <div class="row">
+                        <!-- Colonne gauche -->
+                        <div class="col-md-6">
+                            <h5 class="border-bottom pb-2 mb-3 text-warning">
+                                Informations Générales
+                            </h5>
+
+                            <!-- Client -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Client *</label>
+                                <select name="client_id" class="form-control" required>
+                                    {% for client in clients %}
+                                    <option value="{{ client.id }}"
+                                        {% if client.id == activite.client.id %}selected{% endif %}>
+                                        {{ client.nom_client }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <!-- Type -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Type d'activité *</label>
+                                <select name="type_activite" class="form-control" required>
+                                    {% for code, label in types_activite %}
+                                    <option value="{{ code }}"
+                                        {% if code == activite.type_activite %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <!-- Techniciens -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Techniciens assignés</label>
+                                <select name="techniciens" class="form-control" multiple size="5">
+                                    {% for tech in techniciens %}
+                                        <option value="{{ tech.id }}"
+                                            {% if tech in activite.techniciens.all %}
+                                                selected
+                                            {% endif %}>
+                                            {{ tech.prenom }} {{ tech.nom }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <small class="text-muted">
+                                    Maintenez CTRL (ou Cmd sur Mac) pour sélectionner plusieurs techniciens
+                                </small>
+                            </div>
+
+                            <!-- Lieu -->
+                            <div class="mb-3">
+                                <label class="form-label">Lieu</label>
+                                <input type="text" class="form-control"
+                                       name="lieu"
+                                       value="{{ activite.lieu }}">
+                            </div>
+                        </div>
+
+                        <!-- Colonne droite -->
+                        <div class="col-md-6">
+                            <h5 class="border-bottom pb-2 mb-3 text-warning">
+                                Planification
+                            </h5>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Date *</label>
+                                <input type="date"
+                                       class="form-control"
+                                       name="date_activite"
+                                       value="{{ activite.date_activite|date:'Y-m-d' }}"
+                                       required>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <input type="time"
+                                           class="form-control"
+                                           name="heure_debut"
+                                           value="{{ activite.heure_debut|time:'H:i' }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="time"
+                                           class="form-control"
+                                           name="heure_fin"
+                                           value="{{ activite.heure_fin|time:'H:i' }}">
+                                </div>
+                            </div>
+
+                            <div class="mt-3">
+                                <label class="form-label fw-bold">Statut *</label>
+                                <select name="statut" class="form-control">
+                                    {% for code, label in statuts %}
+                                    <option value="{{ code }}"
+                                        {% if code == activite.statut %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mt-4">
+                        <label class="form-label fw-bold">Description *</label>
+                        <textarea class="form-control"
+                                  name="description"
+                                  rows="4"
+                                  required>{{ activite.description }}</textarea>
+                    </div>
+
+                    <div class="mt-4 d-flex justify-content-between">
+                        <a href="{% url 'detail_activite' activite.id %}"
+                           class="btn btn-secondary">
+                            Annuler
+                        </a>
+
+                        <button type="submit"
+                                class="btn btn-warning">
+                            <i class="fas fa-save me-1"></i> Enregistrer les modifications
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('activiteForm').addEventListener('submit', function(e) {
+    const debut = document.querySelector('input[name="heure_debut"]').value;
+    const fin = document.querySelector('input[name="heure_fin"]').value;
+
+    if (debut && fin && debut >= fin) {
+        e.preventDefault();
+        alert("L'heure de fin doit être après l'heure de début");
+    }
+});
+</script>
+
+<style>
+.card-header.bg-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+}
+</style>
+
+{% endblock %}

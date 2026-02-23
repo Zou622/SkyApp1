@@ -1,0 +1,387 @@
+{% extends 'main.html' %}
+{% load static %}
+
+{% block contenu %}
+<div class="content-wrapper">
+    <div class="container-fluid mt-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-tools me-2"></i> Liste des Techniciens
+                    </h4>
+                    <div class="d-flex align-items-center">
+                        <!-- Formulaire de recherche -->
+                        <form method="get" action="{% url 'list_technicien' %}" class="me-3" style="min-width: 350px;">
+                            <div class="row g-2">
+                                <!-- Filtre par statut -->
+                                <div class="col-md-5">
+                                    <select name="statut" class="form-select form-select-sm" onchange="this.form.submit()">
+                                        <option value="">Tous les statuts</option>
+                                        <option value="actif" {% if request.GET.statut == 'actif' %}selected{% endif %}>Actif</option>
+                                        <option value="inactif" {% if request.GET.statut == 'inactif' %}selected{% endif %}>Inactif</option>
+                                        <option value="congé" {% if request.GET.statut == 'congé' %}selected{% endif %}>En congé</option>
+                                        <option value="mission" {% if request.GET.statut == 'mission' %}selected{% endif %}>En mission</option>
+                                    </select>
+                                </div>
+                                <!-- Recherche texte -->
+                                <div class="col-md-7">
+                                    <div class="input-group input-group-sm">
+                                        <input type="text"
+                                               name="search"
+                                               class="form-control"
+                                               placeholder="Nom, prénom, téléphone..."
+                                               value="{{ search_query|default:'' }}">
+                                        <button class="btn btn-light" type="submit" title="Rechercher">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                        {% if search_query or request.GET.statut %}
+                                        <a href="{% url 'list_technicien' %}" class="btn btn-light" title="Effacer">
+                                            <i class="fas fa-times"></i>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+
+                        <a href="{% url 'ajouter_technicien' %}" class="btn btn-light btn-sm">
+                            <i class="fas fa-user-plus me-1"></i> Ajouter
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Indicateur de filtre -->
+                {% if search_query or request.GET.statut %}
+                <div class="mt-2">
+                    <small>
+                        <i class="fas fa-filter me-1"></i>
+                        {% if request.GET.statut %}
+                        <span class="badge bg-primary me-2">
+                            Statut:
+                            {% if request.GET.statut == 'actif' %}Actif
+                            {% elif request.GET.statut == 'inactif' %}Inactif
+                            {% elif request.GET.statut == 'congé' %}En congé
+                            {% elif request.GET.statut == 'mission' %}En mission
+                            {% endif %}
+                        </span>
+                        {% endif %}
+                        {% if search_query %}
+                        <span class="badge bg-info me-2">"{{ search_query }}"</span>
+                        {% endif %}
+                        | {{ techniciens.paginator.count }} technicien{{ techniciens.paginator.count|pluralize }}
+                    </small>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Cartes de statistiques -->
+            <div class="card-body py-2">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card bg-primary text-white mb-2">
+                            <div class="card-body py-2">
+                                <h6 class="mb-0"><i class="fas fa-users"></i> Total</h6>
+                                <h4 class="mb-0">{{ total_techniciens }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-success text-white mb-2">
+                            <div class="card-body py-2">
+                                <h6 class="mb-0"><i class="fas fa-check-circle"></i> Actifs</h6>
+                                <h4 class="mb-0">{{ actif_count }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-warning text-dark mb-2">
+                            <div class="card-body py-2">
+                                <h6 class="mb-0"><i class="fas fa-bed"></i> En congé</h6>
+                                <h4 class="mb-0">{{ conge_count }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-info text-white mb-2">
+                            <div class="card-body py-2">
+                                <h6 class="mb-0"><i class="fas fa-truck"></i> En mission</h6>
+                                <h4 class="mb-0">{{ mission_count }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body p-0">
+                {% if techniciens %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Nom & Prénom</th>
+                                <th>Contact</th>
+                                <th>Spécialité</th>
+                                <th>Statut</th>
+                                <th>Quartier</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for technicien in techniciens %}
+                            <tr>
+                                <td>
+                                    <span class="badge bg-secondary">#{{ technicien.id }}</span>
+                                </td>
+
+                                <!-- Nom & Prénom -->
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div>
+                                            <h6 class="mb-0">{{ technicien.nom }} {{ technicien.prenom }}</h6>
+                                            <small class="text-muted">
+                                                Embauché: {{ technicien.date_embauche|date:"d/m/Y" }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <div class="small">
+                                        {% if technicien.telephone %}
+                                        <div>
+                                            <i class="fas fa-phone me-1 text-muted"></i>
+                                            <a href="tel:{{ technicien.telephone }}" class="text-decoration-none text-dark">
+                                                {{ technicien.telephone }}
+                                            </a>
+                                        </div>
+                                        {% endif %}
+                                        {% if technicien.email %}
+                                        <div>
+                                            <i class="fas fa-envelope me-1 text-muted"></i>
+                                            <a href="mailto:{{ technicien.email }}" class="text-decoration-none text-dark">
+                                                {{ technicien.email|truncatechars:20 }}
+                                            </a>
+                                        </div>
+                                        {% endif %}
+                                        {% if not technicien.telephone and not technicien.email %}
+                                        <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+
+                                <!-- Spécialité -->
+                                <td>
+                                    {% if technicien.specialite %}
+                                    <span class="badge bg-info">{{ technicien.specialite }}</span>
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+
+                                <!-- Statut -->
+                                <td>
+                                    {% if technicien.statut == 'actif' %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check-circle me-1"></i>Actif
+                                    </span>
+                                    {% elif technicien.statut == 'inactif' %}
+                                    <span class="badge bg-secondary">
+                                        <i class="fas fa-times-circle me-1"></i>Inactif
+                                    </span>
+                                    {% elif technicien.statut == 'congé' %}
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="fas fa-bed me-1"></i>En congé
+                                    </span>
+                                    {% elif technicien.statut == 'mission' %}
+                                    <span class="badge bg-info">
+                                        <i class="fas fa-truck me-1"></i>En mission
+                                    </span>
+                                    {% endif %}
+                                </td>
+
+                                <!-- Quartier -->
+                                <td>
+                                    <span class="text-truncate d-inline-block" style="max-width: 120px;"
+                                          title="{{ technicien.quartier }}">
+                                        {{ technicien.quartier|truncatechars:15 }}
+                                    </span>
+                                </td>
+
+                                <!-- Actions -->
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{% url 'detail_technicien' technicien.id %}"
+                                           class="btn btn-outline-primary" title="Voir détails">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'modifier_technicien' technicien.id %}"
+                                           class="btn btn-outline-warning" title="Modifier">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button"
+                                                class="btn btn-outline-danger"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteModal{{ technicien.id }}"
+                                                title="Supprimer">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- Modal de suppression -->
+                                    <div class="modal fade" id="deleteModal{{ technicien.id }}" tabindex="-1">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-header bg-danger text-white">
+                                                    <h5 class="modal-title">
+                                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                                        Confirmation
+                                                    </h5>
+                                                    <button type="button" class="btn-close btn-close-white"
+                                                            data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>Supprimer le technicien :</p>
+                                                    <p class="h5 text-center my-3">
+                                                        <strong>{{ technicien.nom }} {{ technicien.prenom }}</strong>
+                                                    </p>
+                                                    <p class="text-danger text-center">
+                                                        <small><i class="fas fa-exclamation-circle me-1"></i>
+                                                        Cette action est irréversible !</small>
+                                                    </p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary"
+                                                            data-bs-dismiss="modal">Annuler</button>
+                                                    <a href="{% url 'supprimer_technicien' technicien.id %}"
+                                                       class="btn btn-danger">
+                                                        <i class="fas fa-trash me-1"></i> Supprimer
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <!-- Message si aucun technicien -->
+                <div class="text-center py-5">
+                    <i class="fas fa-tools fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted mb-3">Aucun technicien enregistré</h4>
+                    <p class="text-muted mb-4">Commencez par ajouter votre premier technicien</p>
+                    <a href="{% url 'ajouter_technicien' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-plus me-2"></i> Ajouter un technicien
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Pagination -->
+            <div class="card-footer">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Affichage de <strong>{{ techniciens.start_index|default:0 }}</strong>
+                            à <strong>{{ techniciens.end_index|default:0 }}</strong>
+                            sur <strong>{{ techniciens.paginator.count|default:0 }}</strong> techniciens
+                        </span>
+                    </div>
+
+                    {% if techniciens.has_other_pages %}
+                    <nav aria-label="Navigation des pages">
+                        <ul class="pagination mb-0">
+                            {% if techniciens.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link"
+                                   href="?page={{ techniciens.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if statut_filter %}&statut={{ statut_filter }}{% endif %}">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link"><i class="fas fa-chevron-left"></i></span>
+                            </li>
+                            {% endif %}
+
+                            {% for i in techniciens.paginator.page_range %}
+                                {% if techniciens.number == i %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ i }}</span>
+                                </li>
+                                {% elif i > techniciens.number|add:'-3' and i < techniciens.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link"
+                                       href="?page={{ i }}{% if search_query %}&search={{ search_query }}{% endif %}{% if statut_filter %}&statut={{ statut_filter }}{% endif %}">
+                                        {{ i }}
+                                    </a>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if techniciens.has_next %}
+                            <li class="page-item">
+                                <a class="page-link"
+                                   href="?page={{ techniciens.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if statut_filter %}&statut={{ statut_filter }}{% endif %}">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link"><i class="fas fa-chevron-right"></i></span>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-circle {
+    border: 2px solid #dee2e6;
+}
+
+.badge.bg-info { background-color: #0dcaf0 !important; }
+.badge.bg-warning { background-color: #ffc107 !important; color: #000 !important; }
+.badge.bg-success { background-color: #198754 !important; }
+.badge.bg-secondary { background-color: #6c757d !important; }
+
+.card.bg-primary { background-color: #0d6efd !important; }
+.card.bg-success { background-color: #198754 !important; }
+.card.bg-warning { background-color: #ffc107 !important; }
+.card.bg-info { background-color: #0dcaf0 !important; }
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Mise en évidence des lignes selon le statut
+    document.querySelectorAll('tr').forEach(row => {
+        const badge = row.querySelector('.badge');
+        if (badge) {
+            if (badge.classList.contains('bg-success')) {
+                row.style.borderLeft = '4px solid #198754';
+            } else if (badge.classList.contains('bg-warning')) {
+                row.style.borderLeft = '4px solid #ffc107';
+            } else if (badge.classList.contains('bg-info')) {
+                row.style.borderLeft = '4px solid #0dcaf0';
+            } else if (badge.classList.contains('bg-secondary')) {
+                row.style.borderLeft = '4px solid #6c757d';
+            }
+        }
+    });
+});
+</script>
+{% endblock contenu %}

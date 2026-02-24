@@ -46,7 +46,7 @@ def login_view(request):
     else:
         form = LoginForm()
 
-    return render(request, 'users/login.html', {'form': form})
+    return render(request, 'utilisateurs/login.html', {'form': form})
 
 
 def register_view(request):
@@ -68,7 +68,7 @@ def register_view(request):
     else:
         form = UserRegistrationForm()
 
-    return render(request, 'users/register.html', {'form': form})
+    return render(request, 'utilisateurs/register.html', {'form': form})
 
 
 @login_required
@@ -79,15 +79,15 @@ def logout_view(request):
     return redirect('users:login')
 
 
-@login_required
+@login_required(login_url='users:login')
 def dashboard(request):
     """Dashboard principal"""
     context = {
         'user': request.user,
-        'stats': get_user_stats(request.user),
+        # 'stats': get_user_stats(request.user),  # Temporairement commenté
     }
-    return render(request, 'users/dashboard.html', context)
-
+    # Utilise le nouveau nom sans espace
+    return render(request, 'utilisateurs/dashboard.html', context)
 
 @login_required
 def profile_view(request):
@@ -101,12 +101,12 @@ def profile_view(request):
     else:
         form = UserProfileForm(instance=request.user)
 
-    return render(request, 'users/profile.html', {'form': form})
+    return render(request, 'utilisateurs/profile.html', {'form': form})
 
 
-@login_required
+
 @admin_required
-def liste_utilisateurs(request):
+def list_utilisateurs(request):
     """Liste tous les utilisateurs (admin seulement)"""
     users = User.objects.all().order_by('-date_inscription')
 
@@ -119,7 +119,7 @@ def liste_utilisateurs(request):
     if est_valide:
         users = users.filter(est_valide=(est_valide == 'true'))
 
-    return render(request, 'users/admin/liste_utilisateurs.html', {
+    return render(request, 'utilisateurs/list_utilisateurs.html', {
         'users': users,
         'user_type_actuel': user_type,
         'types_utilisateurs': User.TYPE_USER,
@@ -144,7 +144,12 @@ def get_user_stats(user):
     if user.user_type == 'technicien' and user.technicien:
         activites = Activite.objects.filter(techniciens=user.technicien)
         stats['activites_total'] = activites.count()
-        stats['activites_aujourdhui'] = activites.filter(date_activite=timezone.now().date()).count()
+
+        # ⚠️ IMPORTANT : Convertir la date en string
+        aujourd_hui = timezone.now().date()
+        stats['activites_aujourdhui'] = activites.filter(date_activite=aujourd_hui).count()
+        # Le count() retourne un nombre, pas un objet date, donc c'est bon
+
         stats['en_cours'] = activites.filter(statut='en_cours').count()
         stats['planifie'] = activites.filter(statut='planifie').count()
         stats['termine'] = activites.filter(statut='termine').count()

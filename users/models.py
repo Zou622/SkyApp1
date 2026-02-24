@@ -16,7 +16,6 @@ class User(AbstractUser):
         ('commercial', 'Commercial'),
         ('technicien', 'Technicien'),
         ('comptable', 'Comptable'),
-        ('standard', 'Standardiste'),
     ]
 
     # Champs supplémentaires

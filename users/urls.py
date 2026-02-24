@@ -16,7 +16,7 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'),
 
     # Admin
-    path('admin/users/', views.liste_utilisateurs, name='liste_utilisateurs'),
+    path('admin/users/', views.list_utilisateurs, name='liste_utilisateurs'),
     path('admin/user/<int:user_id>/valider/', views.valider_utilisateur, name='valider_utilisateur'),
 
     # Password reset

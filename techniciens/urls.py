@@ -4,7 +4,7 @@ from . import views
 urlpatterns = [
 
     # URLs pour les techniciens
-    path('/', views.list_technicien, name='list_technicien'),
+    path('list_technicien', views.list_technicien, name='list_technicien'),
 
     path('ajouter_technicien/', views.ajouter_technicien, name='ajouter_technicien'),
     path('enregistrer_technicien/', views.enregistrer_technicien, name='enregistrer_technicien'),

@@ -1,10 +1,114 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends 'main.html' %}
+{% load static %}
+
+{% block contenu %}
+
+<div class="content-wrapper">
+    <div class="container-fluid mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+
+                <div class="card shadow-lg">
+                    
+                    <!-- Header -->
+                    <div class="card-header bg-primary text-white py-3">
+                        <h4 class="mb-0">
+                            <i class="fas fa-user-plus me-2"></i>
+                            Inscription d'un nouvel utilisateur
+                        </h4>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="card-body p-4">
+
+                        {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <strong>Erreur :</strong> Veuillez corriger les champs ci-dessous.
+                        </div>
+                        {% endif %}
+
+                        <form method="POST">
+                            {% csrf_token %}
+
+                            <div class="row">
+
+                                <!-- Username -->
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Nom d'utilisateur</label>
+                                    {{ form.username }}
+                                    <small class="text-danger">{{ form.username.errors }}</small>
+                                </div>
+
+                                <!-- Email -->
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Email</label>
+                                    {{ form.email }}
+                                    <small class="text-danger">{{ form.email.errors }}</small>
+                                </div>
+
+                                <!-- First Name -->
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Prénom</label>
+                                    {{ form.first_name }}
+                                    <small class="text-danger">{{ form.first_name.errors }}</small>
+                                </div>
+
+                                <!-- Last Name -->
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Nom</label>
+                                    {{ form.last_name }}
+                                    <small class="text-danger">{{ form.last_name.errors }}</small>
+                                </div>
+
+                                <!-- Telephone -->
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Téléphone</label>
+                                    {{ form.telephone }}
+                                    <small class="text-danger">{{ form.telephone.errors }}</small>
+                                </div>
+
+                                <!-- Type utilisateur -->
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Type d'utilisateur</label>
+                                    {{ form.user_type }}
+                                    <small class="text-danger">{{ form.user_type.errors }}</small>
+                                </div>
+
+                                <!-- Password1 -->
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Mot de passe</label>
+                                    {{ form.password1 }}
+                                    <small class="text-danger">{{ form.password1.errors }}</small>
+                                </div>
+
+                                <!-- Password2 -->
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Confirmer mot de passe</label>
+                                    {{ form.password2 }}
+                                    <small class="text-danger">{{ form.password2.errors }}</small>
+                                </div>
+
+                            </div>
+
+                            <!-- Boutons -->
+                            <div class="d-flex justify-content-between mt-4">
+                                <a href="#" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i> Retour
+                                </a>
+
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i> Enregistrer
+                                </button>
+                            </div>
+
+                        </form>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,9 +1,10 @@
 from django.db import models
 import os
-
+from django.conf import settings
 
 class Technicien(models.Model):
     # Informations personnelles
+    #user = models.OneToOneField(settings.AUTH_USER_MODEL,on_delete=models.CASCADE,related_name='technicien')
     nom = models.CharField(max_length=100, verbose_name="Nom")
     prenom = models.CharField(max_length=100, verbose_name="Prénom")
     email = models.EmailField(verbose_name="Email", unique=True)

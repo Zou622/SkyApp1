@@ -14,7 +14,7 @@
                     <div class="d-flex align-items-center">
                         <!-- Recherche et filtres -->
                         <div class="me-3" style="min-width: 400px;">
-                            <form method="get" action="{% url 'list_client' %}">
+                            <form method="get" action="{% url 'clients:list_client' %}">
                                 <div class="row g-2 align-items-center">
                                     <!-- Filtre par statut -->
                                     <div class="col-md-4">
@@ -50,7 +50,7 @@
                         </div>
 
                         <!-- Bouton Ajouter -->
-                        <a href="{% url 'ajouter_client' %}" class="btn btn-light btn-sm">
+                        <a href="{% url 'clients:ajouter_client' %}" class="btn btn-light btn-sm">
                             <i class="fas fa-user-plus me-1"></i> Ajouter
                         </a>
                     </div>
@@ -201,12 +201,12 @@
                                             </a>
                                             <ul class="dropdown-menu" aria-labelledby="dropdownClient{{ client.id }}">
                                                 <li>
-                                                    <a class="dropdown-item" href="{% url 'ajouter_activite_avec_client' client.id %}">
+                                                    <a class="dropdown-item" href="{% url 'clients:ajouter_activite_avec_client' client.id %}">
                                                         <i class="fas fa-plus-circle me-2 text-success"></i> Nouvelle activité
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a href="{% url 'liste_activites_client' client.id %}"
+                                                    <a href="{% url 'clients:liste_activites_client' client.id %}"
                                                        class="dropdown-item">
                                                         <i class="fas fa-list me-2"></i> Liste activité
                                                     </a>
@@ -214,7 +214,7 @@
                                                 </li>
                                                 <li><hr class="dropdown-divider"></li>
                                                 <li>
-                                                    <a class="dropdown-item text-danger" href="{% url 'supprimer_client' client.id %}">
+                                                    <a class="dropdown-item text-danger" href="{% url 'clients:supprimer_client' client.id %}">
                                                         <i class="fas fa-trash me-2"></i> Supprimer le client
                                                     </a>
                                                 </li>
@@ -308,11 +308,11 @@
                                     <div class="small text-dark">
                                         <div>
                                             <i class="fas fa-download text-success me-1"></i>
-                                            {{ client.download|default:"-" }}
+                                            {{ client.download|default:"-" }}Mbps
                                         </div>
                                         <div>
                                             <i class="fas fa-upload text-info me-1"></i>
-                                            {{ client.upload|default:"-" }}
+                                            {{ client.upload|default:"-" }}Mbps
                                         </div>
                                     </div>
                                 </td>
@@ -320,7 +320,7 @@
                                 <!-- Contrat PDF -->
                                 <td>
                                     {% if client.contrat_pdf %}
-                                    <a href="{% url 'voir_pdf' client.id %}"
+                                    <a href="{% url 'clients:voir_pdf' client.id %}"
                                        target="_blank"
                                        class="btn btn-sm btn-outline-danger"
                                        title="Voir PDF">
@@ -334,11 +334,11 @@
                                 <!-- Actions -->
                                 <td class="text-center">
                                     <div class="btn-group btn-group-sm">
-                                        <a href="{% url 'detail_client' client.id %}"
+                                        <a href="{% url 'clients:detail_client' client.id %}"
                                            class="btn btn-outline-success" title="Voir">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <a href="{% url 'modifier_client' client.id %}"
+                                        <a href="{% url 'clients:modifier_client' client.id %}"
                                            class="btn btn-outline-warning" title="Modifier">
                                             <i class="fas fa-edit"></i>
                                         </a>
@@ -370,7 +370,7 @@
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                                            <a href="{% url 'supprimer_client' client.id %}" class="btn btn-danger">
+                                            <a href="{% url 'clients:supprimer_client' client.id %}" class="btn btn-danger">
                                                 <i class="fas fa-trash me-1"></i> Supprimer
                                             </a>
                                         </div>

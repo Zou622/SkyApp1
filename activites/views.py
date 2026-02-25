@@ -5,6 +5,7 @@ from django.http import HttpResponse, FileResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from collections import defaultdict
+from django.contrib.auth.decorators import login_required, user_passes_test
 
 from activites.models import Activite
 from commercials.models import Commercial
@@ -368,3 +369,21 @@ def activites_par_technicien(request):
     }
 
     return render(request, "activites_par_technicien.html", context)
+
+@login_required
+def mes_activites(request):
+
+    if request.user.user_type != "technicien":
+        return redirect("dashboard")  # sécurité
+
+    # récupérer le technicien lié au user connecté
+    technicien = request.user.technicien
+
+    # filtrer seulement SES activités
+    activites = Activite.objects.filter(technicien=technicien)
+
+    context = {
+        "activites": activites
+    }
+
+    return render(request, "activites/mes_activites.html", context)

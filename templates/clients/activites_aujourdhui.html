@@ -70,10 +70,10 @@
                                             <div class="card-footer bg-transparent border-0 pt-0 pb-2">
                                                 <div class="d-flex justify-content-between align-items-center">
                                                     <div class="btn-group btn-group-sm" role="group">
-                                                        <a href="{% url 'detail_activite' activite.id %}" class="btn btn-outline-primary" title="Détails">
+                                                        <a href="{% url 'clients:detail_activite' activite.id %}" class="btn btn-outline-primary" title="Détails">
                                                             <i class="fas fa-eye"></i>
                                                         </a>
-                                                        <a href="{% url 'modifier_activite' activite.id %}" class="btn btn-outline-warning" title="Modifier">
+                                                        <a href="{% url 'clients:modifier_activite' activite.id %}" class="btn btn-outline-warning" title="Modifier">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
                                                         {% if activite.get_statut_display != 'Terminé' %}
@@ -124,7 +124,7 @@
                     </div>
                     <div class="modal-footer py-2">
                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Annuler</button>
-                        <form method="post" action="{% url 'supprimer_activite' activite.id %}" class="d-inline">
+                        <form method="post" action="{% url 'clients:supprimer_activite' activite.id %}" class="d-inline">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> Supprimer</button>
                         </form>

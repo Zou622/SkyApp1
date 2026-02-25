@@ -1,0 +1,66 @@
+{% extends "main.html" %}
+{% block contenu %}
+
+<div class="content-wrapper">
+    <div class="container mt-4">
+
+        <div class="card shadow">
+            <div class="card-header bg-warning text-white">
+                <h4><i class="fas fa-tasks"></i> Mes Activités</h4>
+            </div>
+
+            <div class="card-body">
+                {% if activites %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Client</th>
+                                    <th>Date</th>
+                                    <th>Heure</th>
+                                    <th>Durée</th>
+                                    <th>Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for activite in activites %}
+                                <tr>
+                                    <td>{{ activite.get_type_activite_display }}</td>
+                                    <td>{{ activite.client }}</td>
+                                    <td>{{ activite.date_activite }}</td>
+                                    <td>
+                                        {{ activite.heure_debut }} - {{ activite.heure_fin }}
+                                    </td>
+                                    <td>{{ activite.duree_activite }}</td>
+                                    <td>
+                                        {% if activite.statut == "planifie" %}
+                                            <span class="badge bg-primary">Planifié</span>
+                                        {% elif activite.statut == "en_cours" %}
+                                            <span class="badge bg-warning text-dark">En cours</span>
+                                        {% elif activite.statut == "termine" %}
+                                            <span class="badge bg-success">Terminé</span>
+                                        {% elif activite.statut == "annule" %}
+                                            <span class="badge bg-danger">Annulé</span>
+                                        {% elif activite.statut == "reporte" %}
+                                            <span class="badge bg-secondary">Reporté</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info text-center">
+                        Aucune activité trouvée.
+                    </div>
+                {% endif %}
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

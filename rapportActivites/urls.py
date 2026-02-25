@@ -1,5 +1,9 @@
 from django.urls import path
+
+from users.urls import app_name
 from . import views
+
+app_name = 'rapportActivites'
 
 urlpatterns = [
     path('activites/technicien/<int:technicien_id>/', views.liste_activites_technicien, name='liste_activites_technicien_avec_id'),

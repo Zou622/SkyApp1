@@ -20,7 +20,10 @@ class User(AbstractUser):
 
     # Champs supplémentaires
     #user = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.SET_NULL,null=True,blank=True)
-    user_type = models.CharField(max_length=20, choices=TYPE_USER, default='technicien')
+    user_type = models.CharField(max_length=20, choices=TYPE_USER)
+    #user_type = models.CharField(max_length=20, choices=TYPE_USER, default='technicien')
+    nom = models.CharField(max_length=25,blank=True)
+    prenom = models.CharField(max_length=30,blank=True)
     telephone = models.CharField(max_length=20, blank=True)
     adresse = models.TextField(blank=True)
     photo = models.ImageField(upload_to='users/photos/', null=True, blank=True)

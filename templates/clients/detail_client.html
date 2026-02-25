@@ -234,7 +234,7 @@
                                     </div>
                                     <div class="card-body text-center">
                                         {% if client.contrat_pdf %}
-                                        <a href="{% url 'voir_pdf' client.id %}"
+                                        <a href="{% url 'clients:voir_pdf' client.id %}"
                                            target="_blank"
                                            class="btn btn-danger btn-lg"
                                            title="Voir le contrat PDF">
@@ -259,11 +259,11 @@
                         <div class="row mt-4">
                             <div class="col-12">
                                 <div class="d-flex justify-content-between">
-                                    <a href="{% url 'list_client' %}" class="btn btn-secondary">
+                                    <a href="{% url 'clients:list_client' %}" class="btn btn-secondary">
                                         <i class="fas fa-arrow-left me-1"></i> Retour à la liste
                                     </a>
                                     <div>
-                                        <a href="{% url 'modifier_client' client.id %}" class="btn btn-warning me-2">
+                                        <a href="{% url 'clients:modifier_client' client.id %}" class="btn btn-warning me-2">
                                             <i class="fas fa-edit me-1"></i> Modifier
                                         </a>
                                         <button type="button"
@@ -307,7 +307,7 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     Annuler
                 </button>
-                <a href="{% url 'supprimer_client' client.id %}" class="btn btn-danger">
+                <a href="{% url 'clients:supprimer_client' client.id %}" class="btn btn-danger">
                     <i class="fas fa-trash me-1"></i> Supprimer définitivement
                 </a>
             </div>

@@ -28,7 +28,7 @@
               <li>
                 <hr class="dropdown-divider">
               </li>
-              <li><a class="dropdown-item" href="#">Déconnecté</a></li>
+              <li><a class="dropdown-item" href="{% url 'users:logout' %}">Déconnecté</a></li>
             </ul>
           </li>
 
@@ -94,12 +94,18 @@
     <div class="sidebar">
       <!-- Sidebar user panel (optional) -->
       <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-        <div class="image">
-          <img src="{% static 'dist/img/user2-160x160.jpg' %}" class="img-circle elevation-2" alt="User Image">
-        </div>
-        <div class="info">
-          <a href="#" class="d-block">Mohamed Zou</a>
-        </div>
+          <div class="image">
+            <img src="{% static 'dist/img/user2-160x160.jpg' %}"
+                 class="img-circle elevation-2" alt="User Image">
+          </div>
+          <div class="info">
+            <a href="#" class="d-block">
+              {{ user.get_full_name|default:user.username }}
+            </a>
+            <small class="text-muted">
+              {{ user.get_user_type_display }}
+            </small>
+          </div>
       </div>
 
       <!-- Sidebar Menu -->
@@ -134,13 +140,13 @@
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item">
-                <a href="{% url 'list_client' %}" class="nav-link">
+                <a href="{% url 'clients:list_client' %}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
                   <p>Liste des Clients</p>
                 </a>
           </li>
               <li class="nav-item">
-                <a href="{% url 'afficher_formulaire' %}" class="nav-link">
+                <a href="{% url 'clients:afficher_formulaire' %}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
                   <p>Nouveau client</p>
                 </a>
@@ -204,13 +210,13 @@
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item">
-                <a href="{% url 'list_activite' %}" class="nav-link">
+                <a href="{% url 'clients:list_activite' %}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
                   <p>Liste des activités</p>
                 </a>
               </li>
               <li class="nav-item">
-                <a href="{% url 'ajouter_activite' %}" class="nav-link">
+                <a href="{% url 'clients:ajouter_activite' %}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
                   <p>Nouvelle activités</p>
                 </a>

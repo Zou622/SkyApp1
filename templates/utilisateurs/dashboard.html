@@ -6,17 +6,17 @@
 <div class="content-wrapper">
     <div class="container-fluid mt-4">
 
-        <!-- Welcome Box -->
-        <div class="card shadow-lg border-0 mb-4">
+        <!-- Welcome -->
+        <div class="card shadow border-0 mb-4">
             <div class="card-body">
-                <h3 class="fw-bold mb-1">
+                <h3 class="font-weight-bold">
                     👋 Bonjour {{ user.first_name|default:user.username }}
                 </h3>
                 <p class="text-muted mb-2">
                     Bienvenue sur votre tableau de bord.
                 </p>
-                <span class="badge bg-primary">
-                    <i class="far fa-calendar-alt me-1"></i>
+                <span class="badge badge-primary">
+                    <i class="far fa-calendar-alt mr-1"></i>
                     {% now "l d F Y" %}
                 </span>
             </div>
@@ -25,68 +25,76 @@
         <!-- Statistiques -->
         <div class="row">
 
-            {% if user.user_type == "admin" %}
-            <div class="col-md-3 mb-4">
-                <div class="card text-center shadow-sm border-0 h-100">
-                    <div class="card-body">
-                        <i class="fas fa-users fa-2x text-primary mb-2"></i>
-                        <h6 class="text-muted">Utilisateurs</h6>
-                        <h2 class="fw-bold">{{ stats.users|default:"0" }}</h2>
+            {% if user.user_type == "admin" or user.user_type == "superviseur" %}
+            <div class="col-md-3">
+                <div class="small-box bg-primary">
+                    <div class="inner">
+                        <h3>{{ stats.users }}</h3>
+                        <p>Utilisateurs</p>
                     </div>
-                </div>
-            </div>
-
-            <div class="col-md-3 mb-4">
-                <div class="card text-center shadow-sm border-0 h-100">
-                    <div class="card-body">
-                        <i class="fas fa-chart-line fa-2x text-success mb-2"></i>
-                        <h6 class="text-muted">Activités</h6>
-                        <h2 class="fw-bold">{{ stats.activites|default:"0" }}</h2>
+                    <div class="icon">
+                        <i class="fas fa-users"></i>
                     </div>
                 </div>
             </div>
             {% endif %}
 
-            {% if user.user_type == "Commercial" %}
-            <div class="col-md-3 mb-4">
-                <div class="card text-center shadow-sm border-0 h-100">
-                    <div class="card-body">
-                        <i class="fas fa-user-check fa-2x text-info mb-2"></i>
-                        <h6 class="text-muted">Clients</h6>
-                        <h2 class="fw-bold">{{ stats.clients|default:"0" }}</h2>
+            {% if user.user_type == "admin" or user.user_type == "superviseur" %}
+            <div class="col-md-3">
+                <div class="small-box bg-success">
+                    <div class="inner">
+                        <h3>{{ stats.activites }}</h3>
+                        <p>Activités</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-chart-line"></i>
                     </div>
                 </div>
             </div>
             {% endif %}
 
-            {% if user.user_type == "technicien" %}
-            <div class="col-md-3 mb-4">
-                <div class="card text-center shadow-sm border-0 h-100">
-                    <div class="card-body">
-                        <i class="fas fa-tasks fa-2x text-warning mb-2"></i>
-                        <h6 class="text-muted">Mes Activités</h6>
-                        <h2 class="fw-bold">{{ stats.mes_activites|default:"0" }}</h2>
+            {% if user.user_type == "admin" or user.user_type == "superviseur" %}
+            <div class="col-md-3">
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <h3>{{ stats.clients }}</h3>
+                        <p>Clients</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-user-check"></i>
                     </div>
                 </div>
+            </div>
+            {% endif %}
+
+            {% if user.user_type|lower == "technicien" %}
+            <div class="col-md-3 mb-3">
+                <a href="{% url 'mes_activites' %}"
+                   class="btn btn-outline-warning w-100">
+                    <i class="fas fa-clipboard-list mr-1"></i>
+                    Mes Activités
+                </a>
             </div>
             {% endif %}
 
         </div>
 
         <!-- Actions rapides -->
-        <div class="card shadow-lg border-0">
+        <div class="card shadow border-0">
             <div class="card-header bg-primary text-white">
                 <h5 class="mb-0">
-                    <i class="fas fa-bolt me-2"></i> Actions rapides
+                    <i class="fas fa-bolt mr-2"></i> Actions rapides
                 </h5>
             </div>
+
             <div class="card-body">
                 <div class="row text-center">
 
                     {% if user.user_type == "admin" %}
                     <div class="col-md-3 mb-3">
-                        <a href="{% url 'users:liste_utilisateurs' %}" class="btn btn-outline-primary w-100">
-                            <i class="fas fa-user-cog me-1"></i>
+                        <a href="{% url 'users:liste_utilisateurs' %}"
+                           class="btn btn-outline-primary w-100">
+                            <i class="fas fa-user-cog mr-1"></i>
                             Gérer utilisateurs
                         </a>
                     </div>
@@ -94,34 +102,28 @@
 
                     {% if user.user_type == "commercial" %}
                     <div class="col-md-3 mb-3">
-                        <a href="{% url 'clients:list_client' %}" class="btn btn-outline-success w-100">
-                            <i class="fas fa-address-book me-1"></i>
+                        <a href="{% url 'clients:list_client' %}"
+                           class="btn btn-outline-success w-100">
+                            <i class="fas fa-address-book mr-1"></i>
                             Mes Clients
                         </a>
                     </div>
                     {% endif %}
 
-                    {% if user.user_type == "technicien" %}
-                            <div class="col-md-3 mb-3">
-                                {% if user.technicien %}
-                                <a href="{% url 'rapportActivites:liste_activites_technicien_avec_id' technicien_id=user.technicien.id %}"
-                                   class="btn btn-outline-warning w-100">
-                                    <i class="fas fa-clipboard-list me-1"></i>
-                                    Mes Activités
-                                </a>
-                                {% else %}
-                                <a href="#"
-                                   class="btn btn-outline-warning w-100">
-                                    <i class="fas fa-clipboard-list me-1"></i>
-                                    Mes Activités
-                                </a>
-                                {% endif %}
-                            </div>
+                    {% if user.user_type == "technicien" and user.technicien %}
+                    <div class="col-md-3 mb-3">
+                        <a href="{% url 'rapportActivites:liste_activites_technicien_avec_id' technicien_id=user.technicien.id %}"
+                           class="btn btn-outline-warning w-100">
+                            <i class="fas fa-clipboard-list mr-1"></i>
+                            Mes Activités
+                        </a>
+                    </div>
                     {% endif %}
 
                     <div class="col-md-3 mb-3">
-                        <a href="{% url 'users:profile' %}" class="btn btn-outline-dark w-100">
-                            <i class="fas fa-user me-1"></i>
+                        <a href="{% url 'users:profile' %}"
+                           class="btn btn-outline-dark w-100">
+                            <i class="fas fa-user mr-1"></i>
                             Mon profil
                         </a>
                     </div>

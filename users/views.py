@@ -8,6 +8,7 @@ from .models import User
 from .forms import LoginForm, UserRegistrationForm, UserProfileForm
 from .decorators import admin_required
 from activites.models import Activite
+from clients.models import Client
 
 
 def login_view(request):
@@ -33,8 +34,8 @@ def login_view(request):
                     # Redirection selon le type
                     if user.user_type == 'admin':
                         return redirect('users:dashboard')
-                    elif user.user_type == 'technicien':
-                        return redirect('rapportActivites:liste_activites_technicien')
+                    elif user.user_type.lower() == 'technicien':
+                        return redirect('clients:mes_activites')
                     elif user.user_type == 'commercial':
                         return redirect('clients:list_client')
                     else:
@@ -79,30 +80,44 @@ def logout_view(request):
     return redirect('users:login')
 
 
-@login_required(login_url='users:login')
-def dashboard(request):
-    """Dashboard principal"""
-    context = {
-        'user': request.user,
-        # 'stats': get_user_stats(request.user),  # Temporairement commenté
-    }
-    # Utilise le nouveau nom sans espace
-    return render(request, 'utilisateurs/dashboard.html', context)
-
 @login_required
-def profile_view(request):
-    """Vue du profil"""
-    if request.method == 'POST':
-        form = UserProfileForm(request.POST, request.FILES, instance=request.user)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "✅ Profil mis à jour avec succès")
-            return redirect('users:profile')
-    else:
-        form = UserProfileForm(instance=request.user)
+def dashboard(request):
+    user = request.user
 
-    return render(request, 'utilisateurs/profile.html', {'form': form})
+    # Initialisation sécurisée
+    stats = {
+        "users": 0,
+        "activites": 0,
+        "clients": 0,
+        "mes_activites": 0,
+    }
 
+    # ADMIN
+    if user.user_type == "admin":
+        stats["users"] = User.objects.count()
+        stats["activites"] = Activite.objects.count()
+        stats["clients"] = Client.objects.count()
+
+    # COMMERCIAL
+    elif user.user_type == "commercial" and user.commercial:
+        stats["clients"] = Client.objects.filter(
+            commercial=user.commercial
+        ).count()
+
+    # TECHNICIEN
+    elif user.user_type == "technicien" and user.technicien:
+        stats["mes_activites"] = Activite.objects.filter(
+            technicien=user.technicien
+        ).count()
+
+    # SUPERVISEUR
+    elif user.user_type == "superviseur":
+        stats["activites"] = Activite.objects.count()
+        stats["clients"] = Client.objects.count()
+
+    return render(request, "utilisateurs/dashboard.html", {
+        "stats": stats
+    })
 
 
 @admin_required
@@ -160,3 +175,10 @@ def get_user_stats(user):
         stats['clients_actifs'] = Client.objects.filter(commercial=user.commercial, statut='actif').count()
 
     return stats
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+
+@login_required
+def profile_view(request):
+    return render(request, "utilisateurs/profile.html")

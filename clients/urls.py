@@ -1,5 +1,9 @@
 from django.urls import path
+
+from users.urls import app_name
 from . import views
+
+app_name = 'clients'
 
 urlpatterns = [
     path('',views.acceuil),
@@ -29,6 +33,7 @@ urlpatterns = [
     path('client/<int:client_id>/activites/', views.liste_activites_client, name='liste_activites_client'),
     path('activites/aujourdhui/', views.activites_aujourdhui, name='activites_aujourdhui'),
     path('activites-par-technicien/', views.activites_par_technicien, name='activites_par_technicien'),
+    path("mes-activites/", views.mes_activites, name="mes_activites"),
 
 
 ]

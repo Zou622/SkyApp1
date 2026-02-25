@@ -6,50 +6,63 @@
 <div class="content-wrapper">
     <div class="container-fluid mt-4">
 
-        <!-- Header -->
-        <div class="card shadow-lg border-0 mb-4">
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <div class="card card-outline card-primary shadow">
+
+            <!-- Header -->
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h4 class="mb-0">
-                    <i class="fas fa-users me-2"></i>
+                    <i class="fas fa-users mr-2"></i>
                     Liste des utilisateurs
                 </h4>
 
-                {% if user.user_type == "Administrateur" or user.user_type == "Superviseur" %}
-                <a href="{% url 'users:register' %}" class="btn btn-light btn-sm">
-                    <i class="fas fa-user-plus me-1"></i>
+                {% if user.user_type == "admin" or user.user_type == "superviseur" %}
+                <a href="{% url 'users:register' %}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-user-plus mr-1"></i>
                     Ajouter utilisateur
                 </a>
                 {% endif %}
             </div>
 
+            <!-- Body -->
             <div class="card-body">
 
-                {% if utilisateurs %}
+                {% if users %}
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light">
+                    <table class="table table-hover table-striped align-middle">
+                        <thead class="bg-light">
                             <tr>
                                 <th>#</th>
-                                <th>Nom complet</th>
+                                <th>Utilisateur</th>
                                 <th>Email</th>
                                 <th>Téléphone</th>
                                 <th>Rôle</th>
-                                <th>Date inscription</th>
+                                <th>Statut</th>
+                                <th>Inscription</th>
                                 <th class="text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
 
-                            {% for u in utilisateurs %}
+                        {% for u in users %}
                             <tr>
                                 <td>{{ forloop.counter }}</td>
 
+                                <!-- Profil -->
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
-                                             style="width:40px;height:40px;">
-                                            {{ u.first_name|first|upper }}{{ u.last_name|first|upper }}
-                                        </div>
+
+                                        {% if u.photo %}
+                                            <img src="{{ u.photo.url }}"
+                                                 class="img-circle elevation-2 mr-2"
+                                                 width="40" height="40"
+                                                 style="object-fit:cover;">
+                                        {% else %}
+                                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mr-2"
+                                                 style="width:40px;height:40px;font-weight:bold;">
+                                                {{ u.first_name|first|upper }}{{ u.last_name|first|upper }}
+                                            </div>
+                                        {% endif %}
+
                                         <div>
                                             <strong>{{ u.get_full_name }}</strong><br>
                                             <small class="text-muted">@{{ u.username }}</small>
@@ -58,47 +71,62 @@
                                 </td>
 
                                 <td>{{ u.email }}</td>
-
                                 <td>{{ u.telephone|default:"-" }}</td>
 
+                                <!-- Rôle -->
                                 <td>
-                                    <span class="badge 
-                                        {% if u.user_type == 'admin' %}bg-danger
-                                        {% elif u.user_type == 'superviseur' %}bg-warning
-                                        {% elif u.user_type == 'commercial' %}bg-info
-                                        {% elif u.user_type == 'technicien' %}bg-success
-                                        {% else %}bg-secondary{% endif %}">
+                                    <span class="badge
+                                        {% if u.user_type == 'admin' %}badge-danger
+                                        {% elif u.user_type == 'superviseur' %}badge-warning
+                                        {% elif u.user_type == 'commercial' %}badge-info
+                                        {% elif u.user_type == 'technicien' %}badge-success
+                                        {% else %}badge-secondary{% endif %}">
                                         {{ u.get_user_type_display }}
                                     </span>
                                 </td>
 
-                                <td>{{ u.date_joined|date:"d/m/Y" }}</td>
+                                <!-- Statut -->
+                                <td>
+                                    {% if u.est_valide %}
+                                        <span class="badge badge-success">Validé</span>
+                                    {% else %}
+                                        <span class="badge badge-danger">Non validé</span>
+                                    {% endif %}
+                                </td>
 
+                                <!-- Date -->
+                                <td>{{ u.date_inscription|date:"d/m/Y" }}</td>
+
+                                <!-- Actions -->
                                 <td class="text-center">
-                                    <div class="btn-group">
+                                    <div class="btn-group btn-group-sm">
 
-                                        <a href="{% url 'users:detail_user' u.id %}"
-                                           class="btn btn-sm btn-outline-primary">
+                                        <a href="#"
+                                           class="btn btn-outline-primary"
+                                           title="Voir">
                                             <i class="fas fa-eye"></i>
                                         </a>
 
                                         {% if user.user_type == "admin" %}
-                                        <a href="{% url 'users:update_user' u.id %}"
-                                           class="btn btn-sm btn-outline-warning">
+                                        <a href="#"
+                                           class="btn btn-outline-warning"
+                                           title="Modifier">
                                             <i class="fas fa-edit"></i>
                                         </a>
 
-                                        <a href="{% url 'users:delete_user' u.id %}"
-                                           class="btn btn-sm btn-outline-danger"
-                                           onclick="return confirm('Supprimer cet utilisateur ?')">
+                                        <a href="#"
+                                           class="btn btn-outline-danger"
+                                           onclick="return confirm('Supprimer cet utilisateur ?')"
+                                           title="Supprimer">
                                             <i class="fas fa-trash"></i>
                                         </a>
                                         {% endif %}
 
                                     </div>
                                 </td>
+
                             </tr>
-                            {% endfor %}
+                        {% endfor %}
 
                         </tbody>
                     </table>

@@ -18,4 +18,5 @@ urlpatterns = [
     path('activites/aujourdhui/', views.activites_aujourdhui, name='activites_aujourdhui'),
     path('activites-par-technicien/', views.activites_par_technicien, name='activites_par_technicien'),
 
+
 ]

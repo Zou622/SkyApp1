@@ -5,7 +5,7 @@ from django.http import HttpResponse, FileResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from collections import defaultdict
-
+from django.contrib.auth.decorators import login_required, user_passes_test
 from activites.models import Activite
 from commercials.models import Commercial
 from django.urls import reverse
@@ -15,6 +15,7 @@ from datetime import date, datetime
 
 from techniciens.models import Technicien
 from .models import Client
+from users.models import User
 
 
 
@@ -387,7 +388,7 @@ def ajouter_activite(request):
                 f'Activité "{activite.get_type_activite_display()}" planifiée pour {client.nom_client}!'
             )
 
-            return redirect('detail_client', client_id)
+            return redirect('clients:detail_client', client_id)
 
         except Exception as e:
             messages.error(request, f'Erreur: {str(e)}')
@@ -404,13 +405,30 @@ def ajouter_activite(request):
     })
 
 def list_activite(request):
+    # 🔐 Si technicien → il ne voit que ses activités
+    if request.user.user_type.lower() == "technicien":
+
+        if not hasattr(request.user, "technicien"):
+            return redirect("dashboard")
+
+        technicien = request.user.technicien
+
+        activites_list = Activite.objects.filter(
+            techniciens=technicien
+        )
+
+    else:
+        # Admin / Superviseur / Commercial
+        activites_list = Activite.objects.all()
+
+
     """Liste toutes les activités"""
     search_query = request.GET.get('search', '')
     statut_filter = request.GET.get('statut', '')
     type_filter = request.GET.get('type', '')
     date_filter = request.GET.get('date', '')
 
-    activites_list = Activite.objects.all()
+
 
     # Filtre de recherche
     if search_query:
@@ -628,3 +646,12 @@ def activites_par_technicien(request):
     }
 
     return render(request, "activites_par_technicien.html", context)
+
+@login_required
+def mes_activites(request):
+    technicien = request.user.technicien
+    activites = Activite.objects.filter(techniciens=technicien)
+
+    return render(request, 'clients/mes_activites.html', {
+        'activites': activites
+    })

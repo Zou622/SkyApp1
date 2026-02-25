@@ -15,6 +15,7 @@ class Activite(models.Model):
         ('tirage', 'Tirage'),
         ('raccordement', 'Raccordement'),
         ('remplacement', 'Remplacement'),
+        ('noc support','Noc Support'),
         ('autre', 'Autre'),
     ]
 
@@ -36,6 +37,7 @@ class Activite(models.Model):
 
     #Relation de 1 à plusieurs technicien
     techniciens = models.ManyToManyField(Technicien,blank=True,related_name="activites")
+
     # Champs
     type_activite = models.CharField(max_length=50, choices=TYPE_ACTIVITE_CHOICES, verbose_name="Type d'activité")
     date_activite = models.DateField(verbose_name="Date de l'activité", default=date.today)
@@ -46,6 +48,7 @@ class Activite(models.Model):
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, verbose_name="Statut", default='planifie')
     date_creation = models.DateTimeField(auto_now_add=True, verbose_name="Date de création")
     date_modification = models.DateTimeField(auto_now=True, verbose_name="Date de modification")
+
 
     class Meta:
         db_table = 'activites_activite'

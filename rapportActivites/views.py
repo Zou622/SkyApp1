@@ -6,6 +6,9 @@ from datetime import datetime
 from .models import Activite, RapportActivite
 from .forms import RapportActiviteForm
 from techniciens.models import Technicien
+from clients.models import Client
+
+from django.contrib.auth.decorators import login_required
 
 
 @login_required

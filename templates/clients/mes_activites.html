@@ -1,66 +1,179 @@
-{% extends "main.html" %}
+{% extends 'main.html' %}
+{% load static %}
+
 {% block contenu %}
-
 <div class="content-wrapper">
-    <div class="container mt-4">
+    <div class="container-fluid mt-3">
+        <div class="card">
+            <div class="container-fluid mt-4">
 
-        <div class="card shadow">
-            <div class="card-header bg-warning text-white">
-                <h4><i class="fas fa-tasks"></i> Mes Activités</h4>
-            </div>
+                <h4 class="mb-3">
+                    <i class="fas fa-user-cog me-2"></i>
+                    Mes Activités
+                </h4>
 
-            <div class="card-body">
-                {% if activites %}
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-hover align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Type</th>
-                                    <th>Client</th>
-                                    <th>Date</th>
-                                    <th>Heure</th>
-                                    <th>Durée</th>
-                                    <th>Statut</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-2">
+                        <h5 class="mb-0">
+                            <i class="fas fa-list me-2"></i>
+                            Mes activités assignées
+                        </h5>
+                        <span class="badge bg-light text-dark">
+                            {{ activites|length }} activité(s)
+                        </span>
+                    </div>
+
+                    <div class="card-body p-3">
+                        {% if activites %}
+                            <div class="row g-3">
                                 {% for activite in activites %}
-                                <tr>
-                                    <td>{{ activite.get_type_activite_display }}</td>
-                                    <td>{{ activite.client }}</td>
-                                    <td>{{ activite.date_activite }}</td>
-                                    <td>
-                                        {{ activite.heure_debut }} - {{ activite.heure_fin }}
-                                    </td>
-                                    <td>{{ activite.duree_activite }}</td>
-                                    <td>
-                                        {% if activite.statut == "planifie" %}
-                                            <span class="badge bg-primary">Planifié</span>
-                                        {% elif activite.statut == "en_cours" %}
-                                            <span class="badge bg-warning text-dark">En cours</span>
-                                        {% elif activite.statut == "termine" %}
-                                            <span class="badge bg-success">Terminé</span>
-                                        {% elif activite.statut == "annule" %}
-                                            <span class="badge bg-danger">Annulé</span>
-                                        {% elif activite.statut == "reporte" %}
-                                            <span class="badge bg-secondary">Reporté</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
+                                    <div class="col-md-3">
+                                        <div class="card h-100 shadow-sm border-primary">
+
+                                            <!-- Header -->
+                                            <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white py-1">
+                                                <small>
+                                                    <i class="far fa-calendar-alt me-1"></i>
+                                                    {{ activite.date_activite|date:"d/m/Y" }}
+                                                </small>
+
+                                                <span class="badge
+                                                    {% if activite.statut == 'en_cours' %}bg-warning text-dark
+                                                    {% elif activite.statut == 'termine' %}bg-success
+                                                    {% elif activite.statut == 'annule' %}bg-danger
+                                                    {% else %}bg-secondary{% endif %}">
+                                                    {{ activite.get_statut_display }}
+                                                </span>
+                                            </div>
+
+                                            <!-- Type activité centré -->
+                                            <div class="text-center mt-2">
+                                                <span class="badge bg-info text-dark px-3 py-1">
+                                                    {{ activite.get_type_activite_display }}
+                                                </span>
+                                            </div>
+
+                                            <!-- Body -->
+                                            <div class="card-body pt-2 pb-2">
+
+                                                <!-- Client -->
+                                                <div class="mb-2">
+                                                    <small class="text-muted d-block">
+                                                        <i class="fas fa-user me-1"></i>Client
+                                                    </small>
+                                                    <strong class="ms-3 small">
+                                                        {{ activite.client.nom_client }}
+                                                    </strong>
+                                                </div>
+
+                                                <!-- Heure -->
+                                                <div class="mb-2">
+                                                    <small class="text-muted d-block">
+                                                        <i class="fas fa-clock me-1"></i>Heure
+                                                    </small>
+                                                    <span class="ms-3 small">
+                                                        {{ activite.heure_debut }} - {{ activite.heure_fin }}
+                                                    </span>
+                                                </div>
+
+                                                <!-- Durée -->
+                                                <div>
+                                                    <small class="text-muted d-block">
+                                                        <i class="fas fa-hourglass-half me-1"></i>Durée
+                                                    </small>
+                                                    <span class="ms-3 small">
+                                                        {{ activite.duree_activite }}
+                                                    </span>
+                                                </div>
+
+                                            </div>
+
+                                            <!-- Footer boutons -->
+                                            <div class="card-footer bg-transparent border-0 pt-0 pb-2">
+                                                <div class="d-flex justify-content-end gap-1">
+
+                                                    <!-- Voir -->
+                                                    <a href="{% url 'clients:detail_activite' activite.id %}"
+                                                       class="btn btn-outline-primary btn-sm"
+                                                       title="Détails">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+
+                                                    <!-- Rapport (disparaît si Terminé) -->
+                                                    {% if activite.statut != "termine" %}
+                                                        <a href="{% url 'clients:rapport_activite' activite.id %}"
+                                                           class="btn btn-outline-success btn-sm"
+                                                           title="Rapport">
+                                                            <i class="fas fa-file-alt"></i>
+                                                        </a>
+                                                    {% endif %}
+
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
                                 {% endfor %}
-                            </tbody>
-                        </table>
+                            </div>
+
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-calendar-day fa-4x text-muted mb-3"></i>
+                                <h4 class="text-muted mb-2">Aucune activité assignée</h4>
+                                <p class="text-muted mb-3">
+                                    Vous n'avez aucune activité pour le moment.
+                                </p>
+                            </div>
+                        {% endif %}
                     </div>
-                {% else %}
-                    <div class="alert alert-info text-center">
-                        Aucune activité trouvée.
-                    </div>
-                {% endif %}
+
+                </div>
             </div>
-
         </div>
-
     </div>
 </div>
+
+<style>
+.card-header.bg-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+}
+
+.card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+}
+
+.btn-group-sm > .btn,
+.btn-sm {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.7rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .col-md-3 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+
+@media (max-width: 576px) {
+    .col-md-3 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+</style>
 
 {% endblock %}

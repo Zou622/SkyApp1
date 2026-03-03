@@ -1,7 +1,7 @@
 from pyexpat import model
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse, FileResponse, JsonResponse
+from django.http import HttpResponse, FileResponse, HttpResponseForbidden, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from collections import defaultdict
@@ -14,21 +14,33 @@ from django.db.models import Q
 from datetime import date, datetime
 
 from techniciens.models import Technicien
+from rapportActivites.models import RapportActivite
 from .models import Client
 from users.models import User
+from django.core.exceptions import PermissionDenied
+from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import render, get_object_or_404, redirect
+from activites.models import Activite
+from .decorators import technicien_required, role_required, admin_required
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 
 
+
+
+
+def is_manager(user):
+    return user.is_authenticated and user.user_type in ['admin', 'superviseur']
 
 # fonction pour afficher le formulaire de Acceuil.
 def acceuil(request):
     return  render(request,'clients/Acceuil.html')
 
-# Fonction pour afficher le formulaire de Ajout client.
-#def afficher_formulaire_ajout(request):
-    #"""Affiche seulement le formulaire d'ajout"""
-   # return render(request, 'clients/Add_client.html')
 
 
+@login_required
+@user_passes_test(is_manager)
 def afficher_formulaire_ajout(request):
     # Récupérer tous les commerciaux
     commerciaux = Commercial.objects.all()
@@ -39,6 +51,8 @@ def afficher_formulaire_ajout(request):
         'client': client
     })
 
+@login_required
+@user_passes_test(is_manager)
 def enregistrer_client(request):
     if request.method == 'POST':
         nom_client = request.POST.get('nom_client', '').strip()
@@ -83,17 +97,18 @@ def enregistrer_client(request):
         )
 
         messages.success(request, f'✅ Client "{nom_client}" ajouté avec succès!')
-        return redirect('list_client')
+        return redirect('clients:list_client')
 
     return redirect('afficher_formulaire')
 
 
-# fonction pour afficher le formulaire de liste client
-# Dans votre views.py
-# Dans votre views.py
 
 
-# Dans la vue list_client
+
+
+
+@login_required
+@user_passes_test(is_manager)
 def list_client(request):
     """
     Vue pour afficher la liste des clients avec statistiques
@@ -177,11 +192,18 @@ def list_client(request):
 # Remplacez {{ stats.suspendu|default:0 }} par {{ stats.suspendu|default:"0" }}
 # Remplacez {{ stats.resilie|default:0 }} par {{ stats.resilie|default:"0" }}
 
+
+@login_required
+@user_passes_test(is_manager)
 #fonction pour afficher le formulaire detail.
 def detail_client(request, client_id):
     client = get_object_or_404(Client, id=client_id)
     return render(request, 'clients/detail_client.html', {'client': client})
 
+
+
+@login_required
+@user_passes_test(is_manager)
 #Fonction pour la modification d'un client
 def modifier_client(request, client_id):
     """Modifier un client existant"""
@@ -243,6 +265,8 @@ def modifier_client(request, client_id):
         }
     )
 
+@login_required
+@user_passes_test(is_manager)
 #Fonction pour la suppression d'un client
 def supprimer_client(request, client_id):
     """Supprimer un client"""
@@ -257,6 +281,8 @@ def supprimer_client(request, client_id):
     return render(request, 'clients/supprimer_client.html', {'client': client})
 
 
+@login_required
+@user_passes_test(is_manager)
 #Fonction pour afficher le pdf
 def voir_pdf(request, client_id):
         """Afficher le PDF d'un client"""
@@ -277,6 +303,9 @@ def voir_pdf(request, client_id):
             messages.error(request, "Aucun fichier PDF disponible")
             return redirect('detail_client', client_id=client_id)
 
+
+@login_required
+@user_passes_test(is_manager)
 #//fonction pour l'activation du client'
 @csrf_exempt
 def activate_client(request, client_id):
@@ -304,6 +333,8 @@ def activate_client(request, client_id):
 
 
 
+@login_required
+@user_passes_test(is_manager)   
 #Le module des cativités
 def ajouter_activite_avec_client(request, client_id):
 
@@ -336,7 +367,7 @@ def ajouter_activite_avec_client(request, client_id):
         # IMPORTANT pour ManyToMany
         activite.techniciens.set(technicien_ids)
 
-        return redirect('detail_client', client_id=client_id)
+        return redirect('clients:detail_client', client_id=client_id)
 
     context = {
         "client": client,
@@ -351,6 +382,8 @@ def ajouter_activite_avec_client(request, client_id):
 
 # clients/views.py
 
+@login_required
+@user_passes_test(is_manager)   
 def ajouter_activite(request):
     if request.method == 'POST':
         client_id = request.POST.get('client_id')
@@ -404,6 +437,8 @@ def ajouter_activite(request):
         'aujourdhui': date.today().isoformat(),
     })
 
+@login_required
+@user_passes_test(is_manager)   
 def list_activite(request):
     # 🔐 Si technicien → il ne voit que ses activités
     if request.user.user_type.lower() == "technicien":
@@ -488,6 +523,8 @@ def list_activite(request):
     return render(request, 'clients/list_activite.html', context)
 
 
+@login_required
+@user_passes_test(is_manager)
 def calendrier_activites(request):
     """Vue calendrier des activités"""
     mois = request.GET.get('mois', date.today().month)
@@ -522,6 +559,8 @@ def calendrier_activites(request):
     return render(request, 'clients/calendrier_activites.html', context)
 
 
+@login_required
+@user_passes_test(is_manager)
 def activites_aujourdhui(request):
     """Liste des activités du jour"""
     aujourdhui = date.today()
@@ -534,13 +573,16 @@ def activites_aujourdhui(request):
     return render(request, 'clients/activites_aujourdhui.html', context)
 
 
+@login_required
+@user_passes_test(is_manager)   
 def detail_activite(request, pk):
     """Détails d'une activité"""
     activite = get_object_or_404(Activite, pk=pk)
     context = {'activite': activite}
     return render(request, 'clients/detail_activite.html', context)
 
-
+@login_required
+@user_passes_test(is_manager)
 def modifier_activite(request, pk):
     """Modifier une activité"""
     activite = get_object_or_404(
@@ -561,6 +603,8 @@ def modifier_activite(request, pk):
 
         # IMPORTANT pour ManyToMany
         techniciens_ids = request.POST.getlist('techniciens')
+        if hasattr(request.user, 'technicien'):
+            raise PermissionDenied
 
         # Validation
         if not client_id or not type_activite or not date_activite:
@@ -602,9 +646,14 @@ def modifier_activite(request, pk):
 
     return render(request, 'clients/modifier_activite.html', context)
 
+@login_required
+@user_passes_test(is_manager)
 def supprimer_activite(request, pk):
     """Supprimer une activité"""
     activite = get_object_or_404(Activite, pk=pk)
+
+    if hasattr(request.user, 'technicien'):
+        raise PermissionDenied
 
     if request.method == 'POST':
         client_nom = activite.client.nom_client
@@ -617,6 +666,9 @@ def supprimer_activite(request, pk):
 
 #la liste des activités par client
 
+
+@login_required
+@user_passes_test(is_manager)
 def liste_activites_client(request, client_id):
     client = get_object_or_404(Client, id=client_id)
 
@@ -629,7 +681,7 @@ def liste_activites_client(request, client_id):
 
     return render(request, 'clients/liste_activites_client.html', context)
 
-
+@login_required
 def activites_par_technicien(request):
     date = timezone.now().date()
     activites = Activite.objects.filter(date_activite=date).prefetch_related('techniciens', 'client')
@@ -647,11 +699,41 @@ def activites_par_technicien(request):
 
     return render(request, "activites_par_technicien.html", context)
 
+
+#La vue des mes activités pour les techniciens connectés
+
+
 @login_required
 def mes_activites(request):
-    technicien = request.user.technicien
+    # Utiliser getattr pour éviter l'exception AttributeError
+    technicien = getattr(request.user, 'technicien', None)
+    
+    if not technicien:
+        return HttpResponseForbidden("Vous n'êtes pas associé à un profil technicien")
+    
     activites = Activite.objects.filter(techniciens=technicien)
+    return render(request, 'clients/mes_activites.html', {'activites': activites})
 
-    return render(request, 'clients/mes_activites.html', {
-        'activites': activites
+@login_required
+def detail_activite(request, id):
+    technicien = request.user.technicien
+    activite = get_object_or_404(
+        Activite,
+        id=id,
+        technicien=technicien
+    )
+
+    return render(request, 'clients/detail_activite.html', {
+        'activite': activite
     })
+
+
+@login_required
+# la fonction pour le rapport d'une activité
+def rapport_activite(request, pk):
+    return render(request, 'rapport_activites/rapport_activite.html', {
+        'activite': get_object_or_404(Activite, pk=pk)
+    })
+
+
+

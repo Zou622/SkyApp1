@@ -1,10 +1,10 @@
 from django.db import models
-import os
 from django.conf import settings
 
+# SUPPRIMEZ cette ligne si elle existe
+# from users.models import User
+
 class Technicien(models.Model):
-    # Informations personnelles
-    #user = models.OneToOneField(settings.AUTH_USER_MODEL,on_delete=models.CASCADE,related_name='technicien')
     nom = models.CharField(max_length=100, verbose_name="Nom")
     prenom = models.CharField(max_length=100, verbose_name="Prénom")
     email = models.EmailField(verbose_name="Email", unique=True)
@@ -27,6 +27,15 @@ class Technicien(models.Model):
         max_length=100,
         verbose_name="Spécialité",
         blank=True
+    )
+
+    # Relation vers User (optionnelle - si vous voulez aussi un lien depuis Technicien)
+    user = models.OneToOneField(
+        'users.User',  # Utilisez une chaîne de caractères
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='technicien_profile'
     )
 
     # Statut

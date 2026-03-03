@@ -36,7 +36,7 @@ class Activite(models.Model):
     )
 
     #Relation de 1 à plusieurs technicien
-    techniciens = models.ManyToManyField(Technicien,blank=True,related_name="activites")
+    techniciens = models.ManyToManyField('techniciens.Technicien',blank=True,related_name="activites")
 
     # Champs
     type_activite = models.CharField(max_length=50, choices=TYPE_ACTIVITE_CHOICES, verbose_name="Type d'activité")

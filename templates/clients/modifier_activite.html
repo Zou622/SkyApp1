@@ -12,7 +12,7 @@
             </div>
 
             <div class="card-body">
-                <form method="post" action="{% url 'modifier_activite' activite.id %}" >
+                <form method="post" action="{% url 'clients:modifier_activite' activite.id %}" >
                     {% csrf_token %}
 
                     <div class="row">
@@ -129,7 +129,7 @@
                     </div>
 
                     <div class="mt-4 d-flex justify-content-between">
-                        <a href="{% url 'detail_activite' activite.id %}"
+                        <a href="{% url 'clients:detail_activite' activite.id %}"
                            class="btn btn-secondary">
                             Annuler
                         </a>

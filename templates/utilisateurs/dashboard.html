@@ -6,14 +6,16 @@
 <div class="content-wrapper">
     <div class="container-fluid mt-4">
 
-        <!-- Welcome -->
+        <!-- ============================= -->
+        <!-- BIENVENUE -->
+        <!-- ============================= -->
         <div class="card shadow border-0 mb-4">
             <div class="card-body">
                 <h3 class="font-weight-bold">
                     👋 Bonjour {{ user.first_name|default:user.username }}
                 </h3>
                 <p class="text-muted mb-2">
-                    Bienvenue sur votre tableau de bord.
+                    Bienvenue sur votre tableau de bord SkyApp.
                 </p>
                 <span class="badge badge-primary">
                     <i class="far fa-calendar-alt mr-1"></i>
@@ -22,14 +24,18 @@
             </div>
         </div>
 
-        <!-- Statistiques -->
+        <!-- ============================= -->
+        <!-- STATISTIQUES -->
+        <!-- ============================= -->
         <div class="row">
 
+            <!-- ADMIN / SUPERVISEUR -->
             {% if user.user_type == "admin" or user.user_type == "superviseur" %}
+            
             <div class="col-md-3">
                 <div class="small-box bg-primary">
                     <div class="inner">
-                        <h3>{{ stats.users }}</h3>
+                        <h3>{{ stats.users|default:0 }}</h3>
                         <p>Utilisateurs</p>
                     </div>
                     <div class="icon">
@@ -37,13 +43,11 @@
                     </div>
                 </div>
             </div>
-            {% endif %}
 
-            {% if user.user_type == "admin" or user.user_type == "superviseur" %}
             <div class="col-md-3">
                 <div class="small-box bg-success">
                     <div class="inner">
-                        <h3>{{ stats.activites }}</h3>
+                        <h3>{{ stats.activites|default:0 }}</h3>
                         <p>Activités</p>
                     </div>
                     <div class="icon">
@@ -51,13 +55,11 @@
                     </div>
                 </div>
             </div>
-            {% endif %}
 
-            {% if user.user_type == "admin" or user.user_type == "superviseur" %}
             <div class="col-md-3">
                 <div class="small-box bg-info">
                     <div class="inner">
-                        <h3>{{ stats.clients }}</h3>
+                        <h3>{{ stats.clients|default:0 }}</h3>
                         <p>Clients</p>
                     </div>
                     <div class="icon">
@@ -65,21 +67,47 @@
                     </div>
                 </div>
             </div>
+
             {% endif %}
 
+
+            <!-- TECHNICIEN -->
             {% if user.user_type|lower == "technicien" %}
-            <div class="col-md-3 mb-3">
-                <a href="{% url 'mes_activites' %}"
-                   class="btn btn-outline-warning w-100">
-                    <i class="fas fa-clipboard-list mr-1"></i>
-                    Mes Activités
-                </a>
+            <div class="col-md-3">
+                <div class="small-box bg-primary">
+                    <div class="inner">
+                        <h3>{{ stats.activites|default:0 }}</h3>
+                        <p>Mes activités</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+
+            <!-- COMMERCIAL -->
+            {% if user.user_type == "commercial" %}
+            <div class="col-md-3">
+                <div class="small-box bg-success">
+                    <div class="inner">
+                        <h3>{{ stats.clients|default:0 }}</h3>
+                        <p>Mes Clients</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-address-book"></i>
+                    </div>
+                </div>
             </div>
             {% endif %}
 
         </div>
 
-        <!-- Actions rapides -->
+
+        <!-- ============================= -->
+        <!-- ACTIONS RAPIDES -->
+        <!-- ============================= -->
         <div class="card shadow border-0">
             <div class="card-header bg-primary text-white">
                 <h5 class="mb-0">
@@ -90,6 +118,7 @@
             <div class="card-body">
                 <div class="row text-center">
 
+                    <!-- ADMIN -->
                     {% if user.user_type == "admin" %}
                     <div class="col-md-3 mb-3">
                         <a href="{% url 'users:liste_utilisateurs' %}"
@@ -100,6 +129,7 @@
                     </div>
                     {% endif %}
 
+                    <!-- COMMERCIAL -->
                     {% if user.user_type == "commercial" %}
                     <div class="col-md-3 mb-3">
                         <a href="{% url 'clients:list_client' %}"
@@ -110,9 +140,10 @@
                     </div>
                     {% endif %}
 
-                    {% if user.user_type == "technicien" and user.technicien %}
+                    <!-- TECHNICIEN -->
+                    {% if user.user_type == "technicien" %}
                     <div class="col-md-3 mb-3">
-                        <a href="{% url 'rapportActivites:liste_activites_technicien_avec_id' technicien_id=user.technicien.id %}"
+                        <a href="{% url 'clients:mes_activites' %}"
                            class="btn btn-outline-warning w-100">
                             <i class="fas fa-clipboard-list mr-1"></i>
                             Mes Activités
@@ -120,6 +151,7 @@
                     </div>
                     {% endif %}
 
+                    <!-- PROFIL -->
                     <div class="col-md-3 mb-3">
                         <a href="{% url 'users:profile' %}"
                            class="btn btn-outline-dark w-100">

@@ -19,7 +19,7 @@
                     Les champs Download et Upload seront automatiquement remplis avec la valeur de la Capacité.
                 </div>
 
-                <form method="post" action="{% url 'enregistrer_client' %}" enctype="multipart/form-data" id="clientForm">
+                <form method="post" action="{% url 'clients:enregistrer_client' %}" enctype="multipart/form-data" id="clientForm">
                     {% csrf_token %}
                     <div class="row">
                         <!-- Colonne 1 : Infos Client -->
@@ -156,7 +156,7 @@
 
                     <!-- Boutons -->
                     <div class="mt-4 border-top pt-3 d-flex justify-content-between">
-                        <a href="{% url 'list_client' %}" class="btn btn-secondary">
+                        <a href="{% url 'clients:list_client' %}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left me-1"></i> Annuler
                         </a>
                         <button type="submit" class="btn btn-success">

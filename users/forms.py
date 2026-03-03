@@ -1,7 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model
 from .models import User
+
 
 
 class LoginForm(AuthenticationForm):
@@ -69,20 +70,30 @@ class UserRegistrationForm(UserCreationForm):
         if User.objects.filter(email=email).exists():
             raise forms.ValidationError("Cet email est déjà utilisé")
         return email
+    
 
 
+User = get_user_model()
 class UserProfileForm(forms.ModelForm):
-    """Formulaire de profil utilisateur"""
+    password = forms.CharField(
+        required=False,
+        widget=forms.PasswordInput,
+        help_text="Laisser vide pour ne pas changer"
+    )
 
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'email', 'telephone',
-                  'adresse', 'photo')
-        widgets = {
-            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
-            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control'}),
-            'telephone': forms.TextInput(attrs={'class': 'form-control'}),
-            'adresse': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-            'photo': forms.FileInput(attrs={'class': 'form-control'}),
-        }
+        fields = ['first_name', 'last_name', 'email', 'telephone', 'photo', 'password']
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        password = self.cleaned_data.get("password")
+
+        # 🔹 Ne changer le mot de passe que si un mot de passe est saisi
+        if password:
+            user.set_password(password)
+        # Sinon on conserve l'ancien mot de passe
+
+        if commit:
+            user.save()
+        return user

@@ -14,10 +14,13 @@ urlpatterns = [
     # Profil
     path('profile/', views.profile_view, name='profile'),
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('profile/modifier/', views.modifier_profile, name='modifier_profile'),
 
     # Admin
     path('users/', views.list_utilisateurs, name='liste_utilisateurs'),
-    path('admin/user/<int:user_id>/valider/', views.valider_utilisateur, name='valider_utilisateur'),
+    path('valider-utilisateur/<int:user_id>/', views.valider_utilisateur, name='valider_utilisateur'),
+    path('supprimer-utilisateur/<int:user_id>/', views.soft_delete_utilisateur, name='supprimer_utilisateur'),
+    
 
     # Password reset
     path('password-reset/',auth_views.PasswordResetView.as_view(template_name='users/password_reset.html'),name='password_reset'),

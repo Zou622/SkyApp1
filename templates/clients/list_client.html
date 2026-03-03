@@ -39,7 +39,7 @@
                                                 <i class="fas fa-search"></i>
                                             </button>
                                             {% if search_query or request.GET.statut %}
-                                            <a href="{% url 'list_client' %}" class="btn btn-light btn-sm" title="Effacer">
+                                            <a href="{% url 'clients:list_client' %}" class="btn btn-light btn-sm" title="Effacer">
                                                 <i class="fas fa-times"></i>
                                             </a>
                                             {% endif %}
@@ -50,7 +50,7 @@
                         </div>
 
                         <!-- Bouton Ajouter -->
-                        <a href="{% url 'clients:ajouter_client' %}" class="btn btn-light btn-sm">
+                        <a href="{% url 'clients:afficher_formulaire' %}" class="btn btn-light btn-sm">
                             <i class="fas fa-user-plus me-1"></i> Ajouter
                         </a>
                     </div>

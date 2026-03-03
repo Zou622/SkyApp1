@@ -3,6 +3,8 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 from commercials.models import Commercial
 
+
+
 TYPE_CONTRAT_CHOICES = [
         ('dedie', 'Dédié'),
         ('partage', 'Partagé'),
@@ -32,4 +34,12 @@ class Client(models.Model):
 
     def __str__(self):
         return self.nom_client
+    
+
+    # Fonctions de vérification des rôles
+    def est_technicien(user):
+        return hasattr(user, 'technicien')
+
+    def est_admin(user):
+        return user.is_superuser or user.is_staff
 

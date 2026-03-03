@@ -44,6 +44,7 @@
                         <tbody>
 
                         {% for u in users %}
+                            {% if u.est_actif %}
                             <tr>
                                 <td>{{ forloop.counter }}</td>
 
@@ -52,10 +53,7 @@
                                     <div class="d-flex align-items-center">
 
                                         {% if u.photo %}
-                                            <img src="{{ u.photo.url }}"
-                                                 class="img-circle elevation-2 mr-2"
-                                                 width="40" height="40"
-                                                 style="object-fit:cover;">
+                                            <img src="{{ u.photo.url }}" class="img-circle elevation-2 mr-2" width="40" height="40" style="object-fit:cover;">
                                         {% else %}
                                             <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mr-2"
                                                  style="width:40px;height:40px;font-weight:bold;">
@@ -87,11 +85,13 @@
 
                                 <!-- Statut -->
                                 <td>
-                                    {% if u.est_valide %}
-                                        <span class="badge badge-success">Validé</span>
-                                    {% else %}
-                                        <span class="badge badge-danger">Non validé</span>
-                                    {% endif %}
+                                    <span id="status-{{ u.id }}">
+                                        {% if u.est_valide %}
+                                            <span class="badge badge-success">Validé</span>
+                                        {% else %}
+                                            <span class="badge badge-danger">Non validé</span>
+                                        {% endif %}
+                                    </span>
                                 </td>
 
                                 <!-- Date -->
@@ -108,17 +108,31 @@
                                         </a>
 
                                         {% if user.user_type == "admin" %}
+                                        <!-- Toggle Activer / Désactiver -->
+                                        <button 
+                                            class="btn btn-outline-success toggle-btn"
+                                            data-id="{{ u.id }}"
+                                            data-status="{% if u.est_valide %}desactiver{% else %}activer{% endif %}"
+                                            title="{% if u.est_valide %}Désactiver{% else %}Activer{% endif %}">
+                                            {% if u.est_valide %}
+                                                <i class="fas fa-toggle-on"></i>
+                                            {% else %}
+                                                <i class="fas fa-toggle-off"></i>
+                                            {% endif %}
+                                        </button>
+
+                                        <!-- Suppression douce -->
+                                        <a href="#" 
+                                           class="btn btn-outline-danger delete-btn" 
+                                           data-id="{{ u.id }}"
+                                           title="Supprimer">
+                                           <i class="fas fa-trash"></i>
+                                        </a>
+
                                         <a href="#"
                                            class="btn btn-outline-warning"
                                            title="Modifier">
                                             <i class="fas fa-edit"></i>
-                                        </a>
-
-                                        <a href="#"
-                                           class="btn btn-outline-danger"
-                                           onclick="return confirm('Supprimer cet utilisateur ?')"
-                                           title="Supprimer">
-                                            <i class="fas fa-trash"></i>
                                         </a>
                                         {% endif %}
 
@@ -126,6 +140,7 @@
                                 </td>
 
                             </tr>
+                            {% endif %}
                         {% endfor %}
 
                         </tbody>
@@ -144,5 +159,129 @@
 
     </div>
 </div>
+
+<!-- SWEETALERT -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    // Toggle Activer / Désactiver
+    document.querySelectorAll(".toggle-btn").forEach(button => {
+
+        button.addEventListener("click", function() {
+
+            const userId = this.dataset.id;
+            const currentButton = this;
+            const action = this.dataset.status;
+
+            Swal.fire({
+                title: `Confirmer la ${action} ?`,
+                text: `L'utilisateur sera ${action === 'activer' ? 'validé' : 'non validé'}.`,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#28a745",
+                cancelButtonColor: "#d33",
+                confirmButtonText: `Oui, ${action}`,
+                cancelButtonText: "Annuler"
+            }).then((result) => {
+
+                if (result.isConfirmed) {
+
+                    fetch("{% url 'users:valider_utilisateur' 0 %}".replace("0", userId), {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": "{{ csrf_token }}",
+                            "Content-Type": "application/json"
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+
+                        if (data.success) {
+
+                            const statusSpan = document.getElementById(`status-${userId}`);
+                            if (action === "activer") {
+                                statusSpan.innerHTML = '<span class="badge badge-success">Validé</span>';
+                                currentButton.innerHTML = '<i class="fas fa-toggle-on"></i>';
+                                currentButton.dataset.status = "desactiver";
+                                currentButton.title = "Désactiver";
+                            } else {
+                                statusSpan.innerHTML = '<span class="badge badge-danger">Non validé</span>';
+                                currentButton.innerHTML = '<i class="fas fa-toggle-off"></i>';
+                                currentButton.dataset.status = "activer";
+                                currentButton.title = "Activer";
+                            }
+
+                            Swal.fire({
+                                title: "Succès !",
+                                text: data.message,
+                                icon: "success",
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                        }
+
+                    });
+
+                }
+
+            });
+
+        });
+
+    });
+
+    // Suppression douce
+    document.querySelectorAll(".delete-btn").forEach(button => {
+
+        button.addEventListener("click", function(e) {
+            e.preventDefault();
+
+            const userId = this.dataset.id;
+            const row = this.closest('tr');
+
+            Swal.fire({
+                title: "Confirmer la suppression ?",
+                text: "L'utilisateur ne sera plus visible et ne pourra plus se connecter.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#6c757d",
+                confirmButtonText: "Oui, supprimer",
+                cancelButtonText: "Annuler"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Soft delete côté back-end
+                    fetch("{% url 'users:supprimer_utilisateur' 0 %}".replace("0", userId), {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": "{{ csrf_token }}",
+                            "Content-Type": "application/json"
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if(data.success){
+                            row.remove(); // retire du tableau
+                            Swal.fire({
+                                title: "Supprimé !",
+                                text: data.message,
+                                icon: "success",
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                        }
+                    });
+
+                }
+            });
+
+        });
+
+    });
+
+});
+</script>
 
 {% endblock %}

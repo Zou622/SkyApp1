@@ -1,10 +1,10 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
-from techniciens.models import Technicien
-from commercials.models import Commercial
 from django.conf import settings
 
+# SUPPRIMEZ cette ligne qui cause l'erreur
+# from techniciens.models import Technicien
 
 class User(AbstractUser):
     """Modèle utilisateur personnalisé"""
@@ -19,11 +19,9 @@ class User(AbstractUser):
     ]
 
     # Champs supplémentaires
-    #user = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.SET_NULL,null=True,blank=True)
     user_type = models.CharField(max_length=20, choices=TYPE_USER)
-    #user_type = models.CharField(max_length=20, choices=TYPE_USER, default='technicien')
-    nom = models.CharField(max_length=25,blank=True)
-    prenom = models.CharField(max_length=30,blank=True)
+    nom = models.CharField(max_length=25, blank=True)
+    prenom = models.CharField(max_length=30, blank=True)
     telephone = models.CharField(max_length=20, blank=True)
     adresse = models.TextField(blank=True)
     photo = models.ImageField(upload_to='users/photos/', null=True, blank=True)
@@ -36,9 +34,9 @@ class User(AbstractUser):
     est_actif = models.BooleanField(default=True)
     est_valide = models.BooleanField(default=False, help_text="Compte validé par un admin")
 
-    # ✅ CORRECTION: Utiliser les classes importées directement
+    # Utilisez des chaînes de caractères au lieu d'importer les classes
     technicien = models.OneToOneField(
-        Technicien,
+        'techniciens.Technicien',  # Changé ici
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -46,7 +44,7 @@ class User(AbstractUser):
     )
 
     commercial = models.OneToOneField(
-        Commercial,
+        'commercials.Commercial',  # Changé ici aussi si nécessaire
         on_delete=models.SET_NULL,
         null=True,
         blank=True,

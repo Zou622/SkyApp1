@@ -34,6 +34,7 @@ urlpatterns = [
     path('activites/aujourdhui/', views.activites_aujourdhui, name='activites_aujourdhui'),
     path('activites-par-technicien/', views.activites_par_technicien, name='activites_par_technicien'),
     path("mes-activites/", views.mes_activites, name="mes_activites"),
+    path('activite/<int:pk>/rapport/', views.rapport_activite, name='rapport_activite'),
 
 
 ]

@@ -248,7 +248,7 @@ def modifier_client(request, client_id):
         client.save()
 
         messages.success(request, f'✅ Client "{client.nom_client}" modifié avec succès!')
-        return redirect('list_client')
+        return redirect('clients:list_client')
 
     # Pour l'affichage du formulaire (GET)
     commerciaux = Commercial.objects.all().order_by('nom', 'prenom')

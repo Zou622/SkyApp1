@@ -22,7 +22,7 @@ class User(AbstractUser):
     user_type = models.CharField(max_length=20, choices=TYPE_USER)
     nom = models.CharField(max_length=25, blank=True)
     prenom = models.CharField(max_length=30, blank=True)
-    telephone = models.CharField(max_length=20, blank=True)
+    telephone = models.CharField(max_length=20, blank=True, null=True)
     adresse = models.TextField(blank=True)
     photo = models.ImageField(upload_to='users/photos/', null=True, blank=True)
 
@@ -48,7 +48,7 @@ class User(AbstractUser):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='user_account'
+        related_name='commercial_profile'
     )
 
     class Meta:

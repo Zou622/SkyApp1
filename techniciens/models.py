@@ -51,6 +51,7 @@ class Technicien(models.Model):
         default='actif',
         verbose_name="Statut"
     )
+    est_actif = models.BooleanField(default=True)
 
     # Dates
     date_embauche = models.DateField(verbose_name="Date d'embauche")

@@ -1,0 +1,148 @@
+{% extends 'main.html' %}
+{% load static %}
+
+{% block contenu %}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+
+            <div class="card shadow-lg border-0 rounded-4">
+                <!-- Header -->
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h5>Lier un compte User à un Technicien ou Commercial</h5>
+                </div>
+
+                <div class="card-body p-4">
+
+                    <!-- Messages -->
+                    {% if messages %}
+                    <div class="mb-3">
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <form method="POST">
+                        {% csrf_token %}
+
+                        <!-- Role -->
+                        <div class="mb-3">
+                            <label for="id_role" class="form-label">Type de compte</label>
+                            {{ form.role }}
+                        </div>
+
+                        <!-- Commercial -->
+                        <div class="mb-3" id="commercial_div">
+                            <label for="id_commercial" class="form-label">Commercial</label>
+                            {{ form.commercial }}
+                        </div>
+
+                        <!-- Technicien -->
+                        <div class="mb-3" id="technicien_div">
+                            <label for="id_technicien" class="form-label">Technicien</label>
+                            {{ form.technicien }}
+                        </div>
+
+                        <hr>
+
+                        <!-- CHAMPS USER -->
+                        <div class="mb-3">
+                            <label for="id_username" class="form-label">Nom d'utilisateur</label>
+                            {{ form.username }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_first_name" class="form-label">Prénom</label>
+                            {{ form.first_name }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_last_name" class="form-label">Nom</label>
+                            {{ form.last_name }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_email" class="form-label">Email</label>
+                            {{ form.email }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_telephone" class="form-label">Téléphone</label>
+                            {{ form.telephone }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_password" class="form-label">Mot de passe</label>
+                            {{ form.password }}
+                        </div>
+
+                        <div class="d-grid mt-3">
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-save me-1"></i> Enregistrer
+                            </button>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- JS pour masquage dynamique et auto-remplissage -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const roleSelect = document.getElementById("id_role");
+    const commercialDiv = document.getElementById("commercial_div");
+    const technicienDiv = document.getElementById("technicien_div");
+
+    const commercialSelect = document.getElementById("id_commercial");
+    const technicienSelect = document.getElementById("id_technicien");
+
+    function toggleFields() {
+        if (roleSelect.value === "commercial") {
+            commercialDiv.style.display = "block";
+            technicienDiv.style.display = "none";
+        } else if (roleSelect.value === "technicien") {
+            commercialDiv.style.display = "none";
+            technicienDiv.style.display = "block";
+        } else {
+            commercialDiv.style.display = "none";
+            technicienDiv.style.display = "none";
+        }
+    }
+
+    roleSelect.addEventListener("change", toggleFields);
+    toggleFields();
+
+    function fetchData(role, id) {
+        fetch("{% url 'users:get_personne_data' %}?role=" + role + "&id=" + id)
+            .then(response => response.json())
+            .then(data => {
+                if(data.first_name) document.getElementById("id_first_name").value = data.first_name;
+                if(data.last_name) document.getElementById("id_last_name").value = data.last_name;
+                if(data.email) document.getElementById("id_email").value = data.email;
+                if(data.telephone) document.getElementById("id_telephone").value = data.telephone;
+            });
+    }
+
+    commercialSelect.addEventListener("change", function () {
+        if (this.value) fetchData("commercial", this.value);
+    });
+
+    technicienSelect.addEventListener("change", function () {
+        if (this.value) fetchData("technicien", this.value);
+    });
+
+});
+</script>
+
+{% endblock %}

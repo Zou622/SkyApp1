@@ -4,6 +4,8 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Q, Count
+
+from commercials.models import Commercial
 from .models import User
 from .forms import LoginForm, UserRegistrationForm, UserProfileForm
 from .decorators import admin_required
@@ -16,6 +18,21 @@ from django.db.models import Count
 from activites.models import Activite, Client
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from django.contrib.auth import get_user_model
+from activites.models import Activite
+from clients.models import Client
+from commercials.models import Commercial
+from techniciens.models import Technicien
+
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+
+
+
 
 
 def login_view(request):
@@ -103,33 +120,61 @@ def dashboard(request):
     # ==============================
     if user.user_type in ["admin", "superviseur"]:
 
-        stats['users'] = User.objects.count()
-        stats['activites'] = Activite.objects.count()
-        stats['clients'] = Client.objects.count()
-
-    # ==============================
-    # TECHNICIEN
-    # ==============================
-    elif user.user_type.lower() == "techniciens":
-
-        stats['activites'] = Activite.objects.filter(
-           techniciens__user=request.user
-        ).distinct().count()
+        stats["total_users"] = User.objects.count()
+        stats["total_clients"] = Client.objects.count()
+        stats["total_activites"] = Activite.objects.count()
+        stats["total_commerciaux"] = Commercial.objects.count()
+        stats["total_techniciens"] = Technicien.objects.count()
 
     # ==============================
     # COMMERCIAL
     # ==============================
     elif user.user_type == "commercial":
 
-        stats['clients'] = Client.objects.filter(
-            commercial=user
-        ).count()
+        commercial = Commercial.objects.filter(
+            user_account=user
+        ).first()
+
+        if commercial:
+            stats["mes_clients"] = Client.objects.filter(
+                commercial=commercial
+            ).count()
+
+            stats["mes_activites"] = Activite.objects.filter(
+                client__commercial=commercial
+            ).count()
+        else:
+            stats["mes_clients"] = 0
+            stats["mes_activites"] = 0
+
+    # ==============================
+    # TECHNICIEN
+    # ==============================
+    elif user.user_type == "technicien":
+
+        technicien = Technicien.objects.filter(
+            user_account=user
+        ).first()
+
+        if technicien:
+            stats["mes_activites"] = Activite.objects.filter(
+                techniciens=technicien
+            ).count()
+        else:
+            stats["mes_activites"] = 0
+
+    # ==============================
+    # AUTRE CAS
+    # ==============================
+    else:
+        stats["info"] = "Aucun rôle défini"
 
     context = {
         "stats": stats
     }
 
     return render(request, "utilisateurs/dashboard.html", context)
+
 
 @admin_required
 def list_utilisateurs(request):
@@ -152,8 +197,6 @@ def list_utilisateurs(request):
     })
 
 
-
-
 @login_required
 @require_POST
 def valider_utilisateur(request, user_id):
@@ -166,7 +209,6 @@ def valider_utilisateur(request, user_id):
         "success": True,
         "message": f"Utilisateur {user.username} validé avec succès"
     })
-
 
 
 @login_required
@@ -183,16 +225,28 @@ def soft_delete_utilisateur(request, user_id):
 @login_required
 def modifier_profile(request):
     user = request.user
+
     if request.method == "POST":
         form = UserProfileForm(request.POST, request.FILES, instance=user)
+
         if form.is_valid():
-            form.save()
-            messages.success(request, "Profil mis à jour avec succès !")
-            return redirect('users:profile')
+            user = form.save(commit=False)
+
+            # Mot de passe
+            password = form.cleaned_data.get("password")
+            if password:
+                user.set_password(password)
+
+            user.save()
+            messages.success(request, "Profil mis à jour avec succès ✅")
+            return redirect("users:profile")
+
     else:
         form = UserProfileForm(instance=user)
 
     return render(request, "utilisateurs/modifier_profile.html", {"form": form})
+
+
 
 
 @login_required
@@ -225,7 +279,6 @@ def profile_view(request):
     return render(request, "utilisateurs/profile.html")
 
 
-
 @login_required
 def statistiques_techniciens(request):
 
@@ -242,3 +295,5 @@ def statistiques_techniciens(request):
     }
 
     return render(request, 'utilisateurs/dashboard.html', context)
+
+

@@ -19,7 +19,7 @@
                             <!-- En-tête avec date et statut -->
                             <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white py-2">
                                 <span><i class="fas fa-calendar-day me-1"></i>{{ activite.date_activite|date:"d/m/Y" }}</span>
-                                <span class="badge
+                                <span clasus="badge
                                     {% if activite.get_statut_display == 'En cours' %}bg-warning text-dark
                                     {% elif activite.get_statut_display == 'Terminé' %}bg-success
                                     {% elif activite.get_statut_display == 'Annulé' %}bg-danger

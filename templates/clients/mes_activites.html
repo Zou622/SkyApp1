@@ -101,7 +101,7 @@
 
                                                     <!-- Rapport (disparaît si Terminé) -->
                                                     {% if activite.statut != "termine" %}
-                                                        <a href="{% url 'clients:rapport_activite' activite.id %}"
+                                                        <a href="{% url 'rapportActivites:creer_rapport' activite.id %}"
                                                            class="btn btn-outline-success btn-sm"
                                                            title="Rapport">
                                                             <i class="fas fa-file-alt"></i>

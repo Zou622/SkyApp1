@@ -5,7 +5,7 @@
 <div class="login-page">
     <div class="login-box">
         <div class="login-logo">
-            <a href="#"><b>Sky</b>App</a>
+            <a href="#"><b>Sky</b>Connect <b>S.A</b></a>
         </div>
 
         <div class="card">
@@ -52,7 +52,7 @@
                 </form>
 
                 <p class="mb-1 mt-3">
-                    <a href="{% url 'users:password_reset' %}">Mot de passe oublié?</a>
+                    <button id="resetPasswordBtn">Mot de passe oublié ?</button>
                 </p>
 
             </div>
@@ -81,4 +81,45 @@
     margin-top: 8px;
 }
 </style>
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById('resetPasswordBtn').addEventListener('click', function() {
+        Swal.fire({
+            title: 'Réinitialiser le mot de passe',
+            html: `<input type="email" id="swal-email" class="swal2-input" placeholder="Votre email">`,
+            showCancelButton: true,
+            confirmButtonText: 'Envoyer',
+            preConfirm: () => {
+                const email = Swal.getPopup().querySelector('#swal-email').value
+                if (!email) Swal.showValidationMessage(`Veuillez entrer votre email`)
+                return email
+            }
+        }).then((result) => {
+            if(result.isConfirmed){
+                fetch("{% url 'users:password_reset_request' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: new URLSearchParams({'email': result.value})
+                })
+                .then(resp => resp.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        Swal.fire('Succès', data.message, 'success')
+                    } else {
+                        Swal.fire('Erreur', data.message, 'error')
+                    }
+                })
+            }
+        })
+    });
+});
+</script>
 {% endblock %}

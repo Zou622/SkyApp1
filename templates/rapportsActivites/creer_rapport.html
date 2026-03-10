@@ -1,0 +1,189 @@
+{% extends "main.html" %}
+
+{% block contenu %}
+
+<div class="content-wrapper">
+
+<div class="container-fluid mt-4">
+
+<div class="card">
+
+<div class="card-header bg-primary text-white">
+
+<h4>
+Rapport : {{ activite.get_type_activite_display }}
+</h4>
+
+</div>
+
+<div class="card-body">
+
+<form method="POST" enctype="multipart/form-data">
+
+{% csrf_token %}
+
+<!-- SECTION 1 -->
+
+<h5 class="text-primary">Informations intervention</h5>
+
+<div class="row">
+
+<div class="col-md-4">
+<label>Date</label>
+{{ form.date_intervention_reelle }}
+</div>
+
+<div class="col-md-4">
+<label>Heure début</label>
+{{ form.heure_debut_reelle }}
+</div>
+
+<div class="col-md-4">
+<label>Heure fin</label>
+{{ form.heure_fin_reelle }}
+</div>
+
+</div>
+
+<hr>
+
+<!-- SECTION 2 -->
+
+<h5 class="text-primary">Travaux réalisés</h5>
+
+<div class="mb-3">
+<label>Description des travaux</label>
+{{ form.travaux_realises }}
+</div>
+
+<div class="mb-3">
+<label>Difficultés rencontrées</label>
+{{ form.difficultes_rencontrees }}
+</div>
+
+<div class="mb-3">
+<label>Solutions apportées</label>
+{{ form.solutions_apportees }}
+</div>
+
+<hr>
+
+<!-- SECTION 3 -->
+
+<h5 class="text-primary">Etat du site</h5>
+
+<div class="row">
+
+<div class="col-md-6">
+<label>Etat avant</label>
+{{ form.etat_avant }}
+</div>
+
+<div class="col-md-6">
+<label>Etat après</label>
+{{ form.etat_apres }}
+</div>
+
+</div>
+
+<hr>
+
+<!-- SECTION 4 -->
+
+<h5 class="text-primary">Equipements</h5>
+
+<div class="row">
+
+<div class="col-md-6">
+<label>Equipements utilisés</label>
+{{ form.equipements_utilises }}
+</div>
+
+<div class="col-md-6">
+<label>Matériel remplacé</label>
+{{ form.materiel_remplace }}
+</div>
+
+</div>
+
+<hr>
+
+<!-- SECTION 5 -->
+
+<h5 class="text-primary">Qualité réseau</h5>
+
+<div class="row">
+
+<div class="col-md-6">
+<label>Qualité signal</label>
+{{ form.qualite_signal }}
+</div>
+
+<div class="col-md-6">
+<label>Débit constaté</label>
+{{ form.debit_constate }}
+</div>
+
+</div>
+
+<hr>
+
+<!-- SECTION 6 -->
+
+<h5 class="text-primary">Client</h5>
+
+<div class="form-check mb-2">
+{{ form.client_present }} Client présent
+</div>
+
+<div class="mb-2">
+<label>Satisfaction</label>
+{{ form.satisfaction_client }}
+</div>
+
+<div class="mb-3">
+<label>Commentaire client</label>
+{{ form.commentaire_client }}
+</div>
+
+<hr>
+
+<!-- SECTION 7 -->
+
+<h5 class="text-primary">Photos</h5>
+
+<div class="row">
+
+<div class="col-md-6">
+<label>Photo avant</label>
+{{ form.photo_avant }}
+</div>
+
+<div class="col-md-6">
+<label>Photo après</label>
+{{ form.photo_apres }}
+</div>
+
+</div>
+
+<div class="text-end mt-4">
+
+<button class="btn btn-success">
+
+Enregistrer le rapport
+
+</button>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+{% endblock %}

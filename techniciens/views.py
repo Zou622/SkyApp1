@@ -3,10 +3,12 @@ from django.contrib import messages
 from django.db.models import Q
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import Technicien
+from django.contrib.auth.decorators import login_required, user_passes_test
 
 
 # ========== VUES POUR LES TECHNICIENS ==========
 
+@login_required
 def list_technicien(request):
     """Liste des techniciens avec recherche"""
     search_query = request.GET.get('search', '').strip()
@@ -64,11 +66,13 @@ def list_technicien(request):
     return render(request, 'techniciens/list_technicien.html', context)
 
 
+@login_required
 def ajouter_technicien(request):
     """Afficher le formulaire d'ajout de technicien"""
     return render(request, 'techniciens/ajouter_technicien.html')
 
 
+@login_required
 def enregistrer_technicien(request):
     """Enregistrer un nouveau technicien"""
     if request.method == 'POST':
@@ -115,12 +119,14 @@ def enregistrer_technicien(request):
     return redirect('ajouter_technicien')
 
 
+@login_required
 def detail_technicien(request, technicien_id):
     """Afficher les détails d'un technicien"""
     technicien = get_object_or_404(Technicien, id=technicien_id)
     return render(request, 'techniciens/detail_technicien.html', {'technicien': technicien})
 
 
+@login_required
 def modifier_technicien(request, technicien_id):
     """Modifier un technicien existant"""
     technicien = get_object_or_404(Technicien, id=technicien_id)
@@ -147,6 +153,7 @@ def modifier_technicien(request, technicien_id):
     return render(request, 'techniciens/modifier_technicien.html', {'technicien': technicien})
 
 
+@login_required
 def supprimer_technicien(request, technicien_id):
     """Supprimer un technicien"""
     technicien = get_object_or_404(Technicien, id=technicien_id)

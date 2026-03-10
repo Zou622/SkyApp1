@@ -1,0 +1,85 @@
+{% extends "main.html" %}
+{% load static %}
+
+{% block contenu %}
+
+<div class="content-wrapper">
+
+<div class="container-fluid mt-4">
+
+<div class="card shadow">
+
+<div class="card-header bg-info text-white">
+<h4><i class="fas fa-search-location"></i> Rapport Survey</h4>
+</div>
+
+<div class="card-body">
+
+<form method="POST">
+{% csrf_token %}
+
+<h5 class="text-primary">Informations Client</h5>
+
+<div class="row">
+
+<div class="col-md-6 mb-3">
+<label>Client</label>
+<input type="text" class="form-control" value="{{ activite.client.nom }}" readonly>
+</div>
+
+<div class="col-md-6 mb-3">
+<label>Technicien</label>
+<input type="text" class="form-control" value="{{ activite.technicien.nom }}" readonly>
+</div>
+
+</div>
+
+<hr>
+
+<h5 class="text-success">Analyse du site</h5>
+
+<div class="row">
+
+<div class="col-md-6 mb-3">
+<label>Visibilité vers le site</label>
+<select name="visibilite" class="form-control">
+<option>Bonne</option>
+<option>Moyenne</option>
+<option>Mauvaise</option>
+</select>
+</div>
+
+<div class="col-md-6 mb-3">
+<label>Distance estimée</label>
+<input type="text" name="distance" class="form-control">
+</div>
+
+</div>
+
+<div class="mb-3">
+<label>Obstacle</label>
+<textarea name="obstacle" class="form-control"></textarea>
+</div>
+
+<div class="mb-3">
+<label>Recommandation</label>
+<textarea name="recommandation" class="form-control"></textarea>
+</div>
+
+<div class="text-center mt-4">
+<button class="btn btn-success">
+<i class="fas fa-save"></i> Enregistrer rapport
+</button>
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,141 @@
+{% extends "main.html" %}
+{% load static %}
+
+{% block contenu %}
+
+<div class="content-wrapper">
+
+<div class="container-fluid mt-4">
+
+<div class="card shadow">
+
+<div class="card-header bg-primary text-white">
+<h4><i class="fas fa-file-alt"></i> Rapport d'installation</h4>
+</div>
+
+<div class="card-body">
+
+<form method="POST">
+
+{% csrf_token %}
+
+<!-- ================= CLIENT ================= -->
+
+<h5 class="text-primary mt-3">Informations Client</h5>
+
+<div class="row">
+
+<div class="col-md-6 mb-3">
+<label>Nom du client</label>
+<input type="text" class="form-control" value="{{ activite.client.nom }}" readonly>
+</div>
+
+<div class="col-md-6 mb-3">
+<label>Téléphone</label>
+<input type="text" class="form-control" value="{{ activite.client.telephone }}" readonly>
+</div>
+
+<div class="col-md-6 mb-3">
+<label>Adresse</label>
+<input type="text" class="form-control" value="{{ activite.client.adresse }}" readonly>
+</div>
+
+<div class="col-md-6 mb-3">
+<label>Technicien</label>
+<input type="text" class="form-control" value="{{ activite.technicien.nom }}" readonly>
+</div>
+
+</div>
+
+<hr>
+
+<!-- ================= INSTALLATION ================= -->
+
+<h5 class="text-success">Détails Installation</h5>
+
+<div class="row">
+
+<div class="col-md-6 mb-3">
+<label>Type d'installation</label>
+<input type="text" name="type_installation" class="form-control">
+</div>
+
+<div class="col-md-6 mb-3">
+<label>Type d'antenne</label>
+<input type="text" name="type_antenne" class="form-control">
+</div>
+
+<div class="col-md-6 mb-3">
+<label>Distance câble (m)</label>
+<input type="number" name="distance_cable" class="form-control">
+</div>
+
+<div class="col-md-6 mb-3">
+<label>Routeur installé</label>
+<input type="text" name="routeur" class="form-control">
+</div>
+
+</div>
+
+<hr>
+
+<!-- ================= SIGNAL ================= -->
+
+<h5 class="text-warning">Signal et Configuration</h5>
+
+<div class="row">
+
+<div class="col-md-4 mb-3">
+<label>Signal RX</label>
+<input type="text" name="signal_rx" class="form-control">
+</div>
+
+<div class="col-md-4 mb-3">
+<label>Signal TX</label>
+<input type="text" name="signal_tx" class="form-control">
+</div>
+
+<div class="col-md-4 mb-3">
+<label>Ping</label>
+<input type="text" name="ping" class="form-control">
+</div>
+
+</div>
+
+<hr>
+
+<!-- ================= COMMENTAIRE ================= -->
+
+<h5 class="text-info">Commentaires</h5>
+
+<div class="mb-3">
+
+<label>Observation du technicien</label>
+
+<textarea name="observation" rows="4" class="form-control"></textarea>
+
+</div>
+
+<!-- ================= BOUTON ================= -->
+
+<div class="text-center mt-4">
+
+<button type="submit" class="btn btn-success">
+
+<i class="fas fa-save"></i> Enregistrer le rapport
+
+</button>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+{% endblock %}

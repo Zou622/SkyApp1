@@ -16,9 +16,11 @@ from datetime import date, datetime
 
 from techniciens.models import Technicien
 from .models import Client
+from django.contrib.auth.decorators import login_required, user_passes_test
 
 
 @csrf_exempt
+@login_required
 def activate_client(request, client_id):
     if request.method == 'POST':
         try:
@@ -45,6 +47,7 @@ def activate_client(request, client_id):
 
 
 #Le module des cativités
+@login_required
 def ajouter_activite_avec_client(request, client_id):
 
     client = get_object_or_404(Client, id=client_id)
@@ -90,7 +93,7 @@ def ajouter_activite_avec_client(request, client_id):
 
 
 # clients/views.py
-
+@login_required
 def ajouter_activite(request):
     if request.method == 'POST':
         client_id = request.POST.get('client_id')
@@ -144,6 +147,8 @@ def ajouter_activite(request):
         'aujourdhui': date.today().isoformat(),
     })
 
+
+@login_required
 def list_activite(request):
     """Liste toutes les activités"""
     search_query = request.GET.get('search', '')
@@ -210,7 +215,7 @@ def list_activite(request):
     }
     return render(request, 'clients/list_activite.html', context)
 
-
+@login_required
 def calendrier_activites(request):
     """Vue calendrier des activités"""
     mois = request.GET.get('mois', date.today().month)
@@ -244,7 +249,7 @@ def calendrier_activites(request):
 
     return render(request, 'clients/calendrier_activites.html', context)
 
-
+@login_required
 def activites_aujourdhui(request):
     """Liste des activités du jour"""
     aujourdhui = date.today()
@@ -256,15 +261,21 @@ def activites_aujourdhui(request):
     }
     return render(request, 'clients/activites_aujourdhui.html', context)
 
-
+@login_required
 def detail_activite(request, pk):
     """Détails d'une activité"""
     activite = get_object_or_404(Activite, pk=pk)
     context = {'activite': activite}
     return render(request, 'clients/detail_activite.html', context)
 
-
+@login_required
 def modifier_activite(request, pk):
+    print(f"Méthode: {request.method}")
+    print(f"Utilisateur: {request.user}")
+    print(f"Authentifié: {request.user.is_authenticated}")
+    if request.user.is_authenticated:
+        print(f"Superuser: {request.user.is_superuser}")
+        
     """Modifier une activité"""
     activite = get_object_or_404(
         Activite.objects.prefetch_related('techniciens'),
@@ -325,6 +336,8 @@ def modifier_activite(request, pk):
 
     return render(request, 'clients/modifier_activite.html', context)
 
+
+@login_required
 def supprimer_activite(request, pk):
     """Supprimer une activité"""
     activite = get_object_or_404(Activite, pk=pk)
@@ -338,8 +351,11 @@ def supprimer_activite(request, pk):
     context = {'activite': activite}
     return render(request, 'activites/supprimer_activite.html', context)
 
-#la liste des activités par client
 
+
+
+#la liste des activités par client
+@login_required
 def liste_activites_client(request, client_id):
     client = get_object_or_404(Client, id=client_id)
 
@@ -353,6 +369,8 @@ def liste_activites_client(request, client_id):
     return render(request, 'clients/liste_activites_client.html', context)
 
 
+
+@login_required
 def activites_par_technicien(request):
     date = timezone.now().date()
     activites = Activite.objects.filter(date_activite=date).prefetch_related('techniciens', 'client')

@@ -1,3 +1,6 @@
+from datetime import timedelta
+import uuid
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
@@ -60,3 +63,18 @@ class User(AbstractUser):
 
     def get_full_name(self):
         return f"{self.first_name} {self.last_name}".strip() or self.username
+    
+
+class PasswordResetToken(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reset_tokens')
+    token = models.UUIDField(default=uuid.uuid4, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_used = models.BooleanField(default=False)
+
+    def is_valid(self):
+        """Le token est valide 1h seulement"""
+        return not self.is_used and self.created_at >= timezone.now() - timedelta(hours=1)
+
+    def mark_used(self):
+        self.is_used = True
+        self.save()

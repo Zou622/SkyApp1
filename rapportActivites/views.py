@@ -9,67 +9,41 @@ from techniciens.models import Technicien
 from clients.models import Client
 
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
+from activites.models import Activite
 
 
-@login_required
-def creer_rapport_activite(request, activite_id):
-    """Créer un rapport pour une activité spécifique"""
+from django.shortcuts import render, get_object_or_404, redirect
+from .forms import RapportActiviteForm
+from activites.models import Activite
+
+
+def creer_rapport(request, activite_id):
 
     activite = get_object_or_404(Activite, id=activite_id)
 
-    # Vérifier que le technicien est bien affecté à cette activité
-    try:
-        technicien = Technicien.objects.get(user=request.user)
-    except Technicien.DoesNotExist:
-        messages.error(request, "Vous n'êtes pas enregistré comme technicien")
-        return redirect('liste_activites_technicien')
+    if request.method == "POST":
 
-    if technicien not in activite.techniciens.all():
-        messages.error(request, "Vous n'êtes pas affecté à cette activité")
-        return redirect('liste_activites_technicien')
-
-    # Vérifier si un rapport existe déjà
-    if hasattr(activite, 'rapport'):
-        messages.warning(request, "Un rapport existe déjà pour cette activité")
-        return redirect('detail_rapport', rapport_id=activite.rapport.id)
-
-    if request.method == 'POST':
-        form = RapportActiviteForm(request.POST, request.FILES, technicien=technicien, activite=activite)
+        form = RapportActiviteForm(
+            request.POST,
+            request.FILES,
+            activite=activite
+        )
 
         if form.is_valid():
             rapport = form.save(commit=False)
             rapport.activite = activite
-            rapport.technicien = technicien
-
-            # Gérer l'action (brouillon ou soumission)
-            action = request.POST.get('action')
-
-            if action == 'soumettre':
-                rapport.statut = 'soumis'
-                activite.statut = 'termine'
-                activite.heure_fin = rapport.heure_fin_reelle or datetime.now().time()
-                messages.success(request, "✅ Rapport soumis avec succès !")
-            else:
-                rapport.statut = 'brouillon'
-                messages.success(request, "📝 Rapport sauvegardé en brouillon")
-
             rapport.save()
-            activite.save()
 
-            return redirect('detail_rapport', rapport_id=rapport.id)
-        else:
-            messages.error(request, "❌ Erreur dans le formulaire. Veuillez vérifier les champs.")
     else:
-        form = RapportActiviteForm(technicien=technicien, activite=activite)
 
-    return render(request, 'activites/creer_rapport.html', {
-        'form': form,
-        'activite': activite,
-        'technicien': technicien
+        form = RapportActiviteForm(activite=activite)
+
+    return render(request, "rapportsActivites/creer_rapport.html", {
+        "form": form,
+        "activite": activite
     })
-
-
-from django.shortcuts import render
 
 
 #La liste des activté par technicien

@@ -18,18 +18,20 @@
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto">
       <!-- Messages Dropdown Menu -->
-         <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Paramétrage
-            </a>
-            <ul class="dropdown-menu dropdown-menu-dark">
-              <li><a class="dropdown-item" href="{% url 'users:register' %}">Nouvel utilisateur</a></li>
-              <li><a class="dropdown-item" href="{% url 'users:liste_utilisateurs' %}">Liste des utilisateur</a></li>
-              <li>
-                <hr class="dropdown-divider">
-              </li>
-              <li><a class="dropdown-item" href="{% url 'users:logout' %}">Déconnecté</a></li>
-            </ul>
+          <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  Paramétrage
+              </a>
+              <ul class="dropdown-menu dropdown-menu-dark">
+                  {% if request.user.is_superuser %}
+                      <!-- Liens visibles uniquement pour admin -->
+                      <li><a class="dropdown-item" href="{% url 'users:register' %}">Nouvel utilisateur</a></li>
+                      <li><a class="dropdown-item" href="{% url 'users:liste_utilisateurs' %}">Liste des utilisateurs</a></li>
+                      <li><hr class="dropdown-divider"></li>
+                  {% endif %}
+                  <!-- Lien Déconnexion visible pour tous -->
+                  <li><a class="dropdown-item" href="{% url 'users:logout' %}">Déconnecté</a></li>
+              </ul>
           </li>
 
       <li class="nav-item dropdown">

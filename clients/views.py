@@ -14,7 +14,7 @@ from django.db.models import Q
 from datetime import date, datetime
 
 from techniciens.models import Technicien
-from rapportActivites.models import RapportActivite
+#from rapportActivites.models import RapportActivite
 from .models import Client
 from users.models import User
 from django.core.exceptions import PermissionDenied
@@ -34,6 +34,7 @@ def is_manager(user):
     return user.is_authenticated and user.user_type in ['admin', 'superviseur']
 
 # fonction pour afficher le formulaire de Acceuil.
+@login_required
 def acceuil(request):
     return  render(request,'clients/Acceuil.html')
 
@@ -575,9 +576,9 @@ def activites_aujourdhui(request):
 
 @login_required
 @user_passes_test(is_manager)   
-def detail_activite(request, pk):
+def detail_activite(request, id):
     """Détails d'une activité"""
-    activite = get_object_or_404(Activite, pk=pk)
+    activite = get_object_or_404(Activite, pk=id)
     context = {'activite': activite}
     return render(request, 'clients/detail_activite.html', context)
 
@@ -604,7 +605,8 @@ def modifier_activite(request, pk):
         # IMPORTANT pour ManyToMany
         techniciens_ids = request.POST.getlist('techniciens')
         if hasattr(request.user, 'technicien'):
-            raise PermissionDenied
+            #raise PermissionDenied
+            pass
 
         # Validation
         if not client_id or not type_activite or not date_activite:
@@ -716,24 +718,13 @@ def mes_activites(request):
 
 @login_required
 def detail_activite(request, id):
-    technicien = request.user.technicien
+    #technicien = request.user.technicien
     activite = get_object_or_404(
         Activite,
         id=id,
-        technicien=technicien
+        #techniciens=technicien
     )
 
     return render(request, 'clients/detail_activite.html', {
         'activite': activite
     })
-
-
-@login_required
-# la fonction pour le rapport d'une activité
-def rapport_activite(request, pk):
-    return render(request, 'rapport_activites/rapport_activite.html', {
-        'activite': get_object_or_404(Activite, pk=pk)
-    })
-
-
-

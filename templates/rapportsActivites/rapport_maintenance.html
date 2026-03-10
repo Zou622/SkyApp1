@@ -1,0 +1,90 @@
+{% extends "main.html" %}
+{% load static %}
+
+{% block contenu %}
+
+<div class="content-wrapper">
+
+<div class="container-fluid mt-4">
+
+<div class="card shadow">
+
+<div class="card-header bg-warning">
+<h4><i class="fas fa-tools"></i> Rapport Maintenance</h4>
+</div>
+
+<div class="card-body">
+
+<form method="POST">
+{% csrf_token %}
+
+<h5 class="text-primary">Informations Client</h5>
+
+<div class="row">
+
+<div class="col-md-6 mb-3">
+<label>Client</label>
+<input type="text" class="form-control" value="{{ activite.client.nom }}" readonly>
+</div>
+
+<div class="col-md-6 mb-3">
+<label>Technicien</label>
+<input type="text" class="form-control" value="{{ activite.technicien.nom }}" readonly>
+</div>
+
+</div>
+
+<hr>
+
+<h5 class="text-success">Détails de la panne</h5>
+
+<div class="row">
+
+<div class="col-md-6 mb-3">
+<label>Type de panne</label>
+<input type="text" name="type_panne" class="form-control">
+</div>
+
+<div class="col-md-6 mb-3">
+<label>Equipement concerné</label>
+<input type="text" name="equipement" class="form-control">
+</div>
+
+</div>
+
+<div class="mb-3">
+<label>Action effectuée</label>
+<textarea name="action_effectuee" class="form-control"></textarea>
+</div>
+
+<div class="row">
+
+<div class="col-md-6 mb-3">
+<label>Signal RX</label>
+<input type="text" name="signal_rx" class="form-control">
+</div>
+
+<div class="col-md-6 mb-3">
+<label>Signal TX</label>
+<input type="text" name="signal_tx" class="form-control">
+</div>
+
+</div>
+
+<div class="text-center mt-4">
+<button class="btn btn-success">
+<i class="fas fa-save"></i> Enregistrer rapport
+</button>
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+{% endblock %}

@@ -1,13 +1,15 @@
+from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
+from django.urls import reverse
 from django.utils import timezone
 from django.db.models import Q, Count
 
 from commercials.models import Commercial
-from .models import User
-from .forms import LoginForm, UserRegistrationForm, UserProfileForm
+from .models import PasswordResetToken, User
+from .forms import LoginForm, PasswordResetRequestForm, SetNewPasswordForm, UserRegistrationForm, UserProfileForm
 from .decorators import admin_required
 from activites.models import Activite
 from clients.models import Client
@@ -30,6 +32,15 @@ from techniciens.models import Technicien
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
+from django.contrib import messages
+from django.core.mail import send_mail
+from django.conf import settings
+from django.utils import timezone
+from .models import PasswordResetToken
+from .forms import PasswordResetRequestForm, SetNewPasswordForm
+from django.contrib.auth import get_user_model
 
 
 
@@ -222,6 +233,8 @@ def soft_delete_utilisateur(request, user_id):
 
 
 
+from django.contrib import messages
+
 @login_required
 def modifier_profile(request):
     user = request.user
@@ -232,20 +245,21 @@ def modifier_profile(request):
         if form.is_valid():
             user = form.save(commit=False)
 
-            # Mot de passe
             password = form.cleaned_data.get("password")
+
             if password:
                 user.set_password(password)
 
             user.save()
-            messages.success(request, "Profil mis à jour avec succès ✅")
-            return redirect("users:profile")
+
+            messages.success(request, "Profil modifié avec succès")
+
+            return redirect('users:profile')
 
     else:
         form = UserProfileForm(instance=user)
 
     return render(request, "utilisateurs/modifier_profile.html", {"form": form})
-
 
 
 
@@ -297,3 +311,79 @@ def statistiques_techniciens(request):
     return render(request, 'utilisateurs/dashboard.html', context)
 
 
+# 1️⃣ Demande de réinitialisation
+def password_reset_request(request):
+    if request.method == 'POST':
+        form = PasswordResetRequestForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            user = User.objects.get(email=email)
+            token = PasswordResetToken.objects.create(user=user)
+            reset_link = request.build_absolute_uri(
+                reverse('users:password_reset_confirm', kwargs={'token': str(token.token)})
+            )
+            # Envoyer email
+            send_mail(
+                subject="Réinitialisation de votre mot de passe",
+                message=f"Bonjour {user.username},\nCliquez sur ce lien pour réinitialiser votre mot de passe:\n{reset_link}\nCe lien est valide 1h.",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[email],
+            )
+            return redirect('users:password_reset_done')
+    else:
+        form = PasswordResetRequestForm()
+    return render(request, 'utilisateurs/password_reset_request.html', {'form': form})
+
+
+# 2️⃣ Confirmation que l'email a été envoyé
+def password_reset_done(request):
+    return render(request, 'utilisateurs/password_reset_done.html')
+
+
+# 3️⃣ Formulaire nouveau mot de passe
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+
+def password_reset_confirm(request, token):
+    token_obj = get_object_or_404(PasswordResetToken, token=token)
+
+    if request.method == "POST":
+        if not token_obj.is_valid():
+            return JsonResponse({'status': 'error', 'message': 'Le lien est invalide ou expiré.'})
+
+        password1 = request.POST.get('password1')
+        password2 = request.POST.get('password2')
+        if not password1 or not password2:
+            return JsonResponse({'status': 'error', 'message': 'Remplissez tous les champs'})
+        if password1 != password2:
+            return JsonResponse({'status': 'error', 'message': 'Les mots de passe ne correspondent pas'})
+
+        token_obj.user.set_password(password1)
+        token_obj.user.save()
+        token_obj.mark_used()
+        return JsonResponse({'status': 'success', 'message': 'Mot de passe réinitialisé avec succès !'})
+
+    return render(request, 'utilisateurs/password_reset_confirm.html', {'token': token})
+
+
+def password_reset_request(request):
+    if request.method == "POST":
+        email = request.POST.get('email', '').strip()
+        try:
+            user = User.objects.get(email__iexact=email)
+        except User.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Cet email n’existe pas.'})
+
+        token = PasswordResetToken.objects.create(user=user)
+        reset_link = request.build_absolute_uri(
+            reverse('users:password_reset_confirm', kwargs={'token': str(token.token)})
+        )
+        # Envoi du mail
+        send_mail(
+            subject="Réinitialisation de votre mot de passe",
+            message=f"Bonjour {user.username},\nCliquez sur ce lien pour réinitialiser votre mot de passe:\n{reset_link}\nCe lien est valide 1h.",
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[email],
+        )
+        return JsonResponse({'status': 'success', 'message': 'Email envoyé avec succès !'})
+    return JsonResponse({'status': 'error', 'message': 'Requête invalide'})

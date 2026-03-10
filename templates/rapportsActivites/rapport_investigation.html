@@ -1,0 +1,70 @@
+{% extends "main.html" %}
+{% load static %}
+
+{% block contenu %}
+
+<div class="content-wrapper">
+
+<div class="container-fluid mt-4">
+
+<div class="card shadow">
+
+<div class="card-header bg-danger text-white">
+<h4><i class="fas fa-bug"></i> Rapport Investigation</h4>
+</div>
+
+<div class="card-body">
+
+<form method="POST">
+{% csrf_token %}
+
+<h5 class="text-primary">Informations</h5>
+
+<div class="row">
+
+<div class="col-md-6 mb-3">
+<label>Client</label>
+<input type="text" class="form-control" value="{{ activite.client.nom }}" readonly>
+</div>
+
+<div class="col-md-6 mb-3">
+<label>Technicien</label>
+<input type="text" class="form-control" value="{{ activite.technicien.nom }}" readonly>
+</div>
+
+</div>
+
+<hr>
+
+<div class="mb-3">
+<label>Problème observé</label>
+<textarea name="probleme" class="form-control"></textarea>
+</div>
+
+<div class="mb-3">
+<label>Diagnostic</label>
+<textarea name="diagnostic" class="form-control"></textarea>
+</div>
+
+<div class="mb-3">
+<label>Solution proposée</label>
+<textarea name="solution" class="form-control"></textarea>
+</div>
+
+<div class="text-center mt-4">
+<button class="btn btn-success">
+<i class="fas fa-save"></i> Enregistrer rapport
+</button>
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+{% endblock %}

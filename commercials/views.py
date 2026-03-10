@@ -7,11 +7,13 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from .models import Commercial
 from datetime import date
+from django.contrib.auth.decorators import login_required
 
 
  #fonction pour afficher le formulaire de liste commercial.
 
 # Liste des commerciaux
+@login_required
 def list_commercial(request):
     search_query = request.GET.get('search', '')
 
@@ -40,6 +42,7 @@ def list_commercial(request):
 
 
 # Ajouter un commercial
+@login_required
 def ajouter_commercial(request):
     if request.method == 'POST':
         # Récupérer les données du formulaire
@@ -88,6 +91,7 @@ def ajouter_commercial(request):
 
 
 # Modifier un commercial
+@login_required
 def modifier_commercial(request, pk):
     commercial = get_object_or_404(Commercial, pk=pk)
 
@@ -135,6 +139,7 @@ def modifier_commercial(request, pk):
 
 
 # Détails d'un commercial
+@login_required
 def detail_commercial(request, pk):
     commercial = get_object_or_404(Commercial, pk=pk)
 
@@ -149,6 +154,7 @@ def detail_commercial(request, pk):
 
 
 # Supprimer un commercial
+@login_required
 def supprimer_commercial(request, pk):
     commercial = get_object_or_404(Commercial, pk=pk)
 

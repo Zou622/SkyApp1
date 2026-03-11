@@ -1,7 +1,4 @@
-version: '3.9'
-
 services:
-
   db:
     image: postgres:15
     environment:
@@ -10,16 +7,20 @@ services:
       POSTGRES_PASSWORD: skypass
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
 
   web:
     build: .
-    command: gunicorn skyApp.wsgi:application --bind 0.0.0.0:8000
+    command: gunicorn SkyApp.wsgi:application --bind 0.0.0.0:8000
     volumes:
-      - .:/app
+      - .:/app 
     ports:
       - "8000:8000"
     depends_on:
       - db
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://skyuser:skypass@db:5432/skyapp
 
 volumes:
   postgres_data:

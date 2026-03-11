@@ -2,6 +2,10 @@ from django.utils import timezone
 from datetime import timedelta
 
 
+from django.utils import timezone
+from datetime import timedelta
+
+
 class LastUserActivityMiddleware:
     """Middleware pour tracker la dernière activité"""
 
@@ -9,26 +13,33 @@ class LastUserActivityMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+
         if request.user.is_authenticated:
             now = timezone.now()
+
             last_seen = request.session.get('last_seen')
+
+            if last_seen:
+                last_seen = timezone.datetime.fromisoformat(last_seen)
 
             if not last_seen or (now - last_seen) > timedelta(minutes=5):
                 request.user.derniere_connexion = now
                 request.user.save()
-                request.session['last_seen'] = now
+
+                # ⚠️ stocker en string
+                request.session['last_seen'] = now.isoformat()
 
         return self.get_response(request)
 
     # Crée un fichier middleware.py dans ton app users
-    class DebugSessionMiddleware:
-        def __init__(self, get_response):
+class DebugSessionMiddleware:
+    def __init__(self, get_response):
             self.get_response = get_response
 
-        def __call__(self, request):
+    def __call__(self, request):
             return self.get_response(request)
 
-        def process_view(self, request, view_func, view_args, view_kwargs):
+    def process_view(self, request, view_func, view_args, view_kwargs):
             if hasattr(request, 'session'):
                 # Vérifie le contenu de la session
                 for key, value in request.session.items():

@@ -7,7 +7,7 @@ COPY requirements.txt .
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 RUN pip install gunicorn
-RUN ls -la && ls -la SkyAp
+
 
 COPY . .
 

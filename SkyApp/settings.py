@@ -52,9 +52,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     #mes apps
+    'users',
     'clients',
     'techniciens',
-    'users',
     'commercials',
     'activites',
     'rapportActivites',

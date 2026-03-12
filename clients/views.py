@@ -100,7 +100,7 @@ def enregistrer_client(request):
         messages.success(request, f'✅ Client "{nom_client}" ajouté avec succès!')
         return redirect('clients:list_client')
 
-    return redirect('afficher_formulaire')
+    return redirect('clients:afficher_formulaire')
 
 
 

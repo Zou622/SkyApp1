@@ -9,7 +9,7 @@ from django.db.models import Q, Count
 
 from commercials.models import Commercial
 from .models import PasswordResetToken, User
-from .forms import LoginForm, PasswordResetRequestForm, SetNewPasswordForm, UserRegistrationForm, UserProfileForm
+from .forms import LoginForm, PasswordResetRequestForm, SetNewPasswordForm, UserProfileForm1, UserRegistrationForm, UserProfileForm
 from .decorators import admin_required
 from activites.models import Activite
 from clients.models import Client
@@ -387,3 +387,50 @@ def password_reset_request(request):
         )
         return JsonResponse({'status': 'success', 'message': 'Email envoyé avec succès !'})
     return JsonResponse({'status': 'error', 'message': 'Requête invalide'})
+
+
+
+@login_required
+@admin_required
+def modifier_utilisateur(request, user_id):
+
+    user = get_object_or_404(User, id=user_id)
+
+    if request.method == "POST":
+        form = UserProfileForm(request.POST, request.FILES, instance=user)
+
+        if form.is_valid():
+            user = form.save(commit=False)
+
+            password = form.cleaned_data.get("password")
+
+            if password:
+                user.set_password(password)
+
+            user.save()
+
+            messages.success(request, "Utilisateur modifié avec succès")
+            return redirect('users:liste_utilisateurs')
+
+    else:
+        form = UserProfileForm(instance=user)
+
+    return render(request, "utilisateurs/modifier_utilisateur.html", {
+        "form": form,
+        "user_obj": user
+    })
+
+
+@login_required
+@admin_required
+def supprimer_utilisateur(request, user_id):
+    """
+    Suppression (soft delete) d'un utilisateur (admin seulement)
+    """
+    if request.method == "POST":
+        user = get_object_or_404(User, id=user_id)
+        user.est_actif = False  # Désactive le compte au lieu de le supprimer
+        user.save()
+        messages.success(request, f"Utilisateur {user.username} désactivé avec succès.")
+        return JsonResponse({"success": True})
+    return JsonResponse({"success": False, "message": "Méthode non autorisée"}, status=405)

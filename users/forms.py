@@ -105,6 +105,42 @@ class UserProfileForm(forms.ModelForm):
         return user
     
 
+User = get_user_model()
+class UserProfileForm1(forms.ModelForm):
+
+    password = forms.CharField(
+        required=False,
+        widget=forms.PasswordInput,
+        help_text="Laisser vide pour ne pas changer"
+    )
+
+    class Meta:
+        model = User
+        fields = [
+            "username",
+            "first_name",
+            "last_name",
+            "email",
+            "telephone",
+            "user_type",
+            "photo",
+            "password"
+        ]
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+
+        password = self.cleaned_data.get("password")
+
+        if password:
+            user.set_password(password)
+
+        if commit:
+            user.save()
+
+        return user
+    
+
 from django import forms
 from django.contrib.auth import get_user_model
 

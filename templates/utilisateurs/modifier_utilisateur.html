@@ -1,0 +1,156 @@
+{% extends 'main.html' %}
+{% load static %}
+
+{% block contenu %}
+
+<div class="content-wrapper">
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-md-7">
+
+                <div class="card shadow border-0 rounded-3">
+
+                    <!-- Header -->
+                    <div class="card-header bg-warning text-white text-center py-3">
+                        <h5 class="mb-0">
+                            <i class="bi bi-pencil-square me-2"></i>
+                            Modification de l’utilisateur {{ user_obj.username }}
+                        </h5>
+                    </div>
+
+                    <div class="card-body p-4">
+
+                        {% if form.errors %}
+                        <div class="alert alert-danger">
+                            Veuillez corriger les erreurs ci-dessous.
+                        </div>
+                        {% endif %}
+
+                        <form method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+
+                            <!-- ROW 1 -->
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Nom d'utilisateur</label>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text">
+                                            <i class="bi bi-person"></i>
+                                        </span>
+                                        {{ form.username }}
+                                    </div>
+                                    <small class="text-danger">{{ form.username.errors }}</small>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Email</label>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text">
+                                            <i class="bi bi-envelope"></i>
+                                        </span>
+                                        {{ form.email }}
+                                    </div>
+                                    <small class="text-danger">{{ form.email.errors }}</small>
+                                </div>
+                            </div>
+
+                            <!-- ROW 2 -->
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Prénom</label>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text">
+                                            <i class="bi bi-person-badge"></i>
+                                        </span>
+                                        {{ form.first_name }}
+                                    </div>
+                                    <small class="text-danger">{{ form.first_name.errors }}</small>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Nom</label>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text">
+                                            <i class="bi bi-person-lines-fill"></i>
+                                        </span>
+                                        {{ form.last_name }}
+                                    </div>
+                                    <small class="text-danger">{{ form.last_name.errors }}</small>
+                                </div>
+                            </div>
+
+                            <!-- ROW 3 -->
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Téléphone</label>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text">
+                                            <i class="bi bi-telephone"></i>
+                                        </span>
+                                        {{ form.telephone }}
+                                    </div>
+                                    <small class="text-danger">{{ form.telephone.errors }}</small>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Type d'utilisateur</label>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text">
+                                            <i class="bi bi-person-gear"></i>
+                                        </span>
+                                        {{ form.user_type }}
+                                    </div>
+                                    <small class="text-danger">{{ form.user_type.errors }}</small>
+                                </div>
+                            </div>
+
+                            <!-- ROW 4 -->
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Mot de passe (laisser vide pour ne pas changer)</label>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text">
+                                            <i class="bi bi-lock"></i>
+                                        </span>
+                                        {{ form.password }}
+                                    </div>
+                                    <small class="text-danger">{{ form.password.errors }}</small>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Confirmer mot de passe</label>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text">
+                                            <i class="bi bi-lock-fill"></i>
+                                        </span>
+                                        {{ form.password2 }}
+                                    </div>
+                                    <small class="text-danger">{{ form.password2.errors }}</small>
+                                </div>
+                            </div>
+
+                            <!-- BUTTONS -->
+                            <div class="d-flex justify-content-between mt-4">
+                                <a href="{% url 'users:liste_utilisateurs' %}"
+                                   class="btn btn-outline-secondary btn-sm rounded-pill">
+                                    <i class="bi bi-arrow-left me-1"></i>
+                                    Retour
+                                </a>
+                                <button type="submit"
+                                        class="btn btn-warning btn-sm rounded-pill">
+                                    <i class="bi bi-check-circle me-1"></i>
+                                    Enregistrer les modifications
+                                </button>
+                            </div>
+
+                        </form>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

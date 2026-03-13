@@ -77,7 +77,7 @@ def ajouter_commercial(request):
                 est_actif=est_actif
             )
 
-            messages.success(request, f'Commercial {commercial.nom_complet()} ajouté avec succès!')
+            messages.success(request, f'Commercial {nom} {prenom} ajouté avec succès!')
             return redirect('list_commercial')
 
         except Exception as e:
@@ -88,6 +88,8 @@ def ajouter_commercial(request):
     SPECIALITES = Commercial.SPECIALITES
     context = {'specialites': SPECIALITES}
     return render(request, 'commercials/ajouter_commercial.html', context)
+
+
 
 
 # Modifier un commercial
@@ -119,7 +121,7 @@ def modifier_commercial(request, pk):
 
         try:
             commercial.save()
-            messages.success(request, f'Commercial {commercial.nom_complet()} modifié avec succès!')
+            messages.success(request, f'Commercial {commercial.nom} {commercial.prenom} modifié avec succès!')
             return redirect('detail_commercial', pk=commercial.pk)
 
         except Exception as e:
